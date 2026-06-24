@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArtikelMeister — Yönetim Paneli</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="login-view" class="view">
+    <div class="login-card">
+      <div class="login-logo">🇩🇪</div>
+      <h1>ArtikelMeister Admin</h1>
+      <p>İçerik yönetim paneli</p>
+      <form id="login-form">
+        <input type="text" id="login-user" placeholder="Kullanıcı adı" required autocomplete="username">
+        <input type="password" id="login-pass" placeholder="Şifre" required autocomplete="current-password">
+        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+      </form>
+      <p id="login-error" class="error hidden"></p>
+      <a href="/index.html" class="back-link">← Uygulamaya dön</a>
+    </div>
+  </div>
+
+  <div id="admin-view" class="view hidden">
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">🛠️ Admin</div>
+      <nav id="nav">
+        <button data-section="dashboard" class="nav-btn active">📊 Özet</button>
+        <button data-section="ai-automation" class="nav-btn">🤖 AI Otomasyon</button>
+        <button data-section="words" class="nav-btn">📚 Kelimeler</button>
+        <button data-section="suffix-rules" class="nav-btn">📝 Son Ekler</button>
+        <button data-section="category-rules" class="nav-btn">📂 Kategoriler</button>
+        <button data-section="exceptions" class="nav-btn">⚠️ İstisnalar</button>
+        <button data-section="cases" class="nav-btn">🔄 Haller</button>
+        <button data-section="achievements" class="nav-btn">🏆 Başarılar</button>
+        <button data-section="daily-tips" class="nav-btn">💡 Günlük İpuçları</button>
+      </nav>
+      <button id="logout-btn" class="btn btn-ghost">Çıkış</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 id="page-title">Özet</h2>
+        <div class="topbar-right">
+          <span id="content-version" class="badge">v-</span>
+          <span id="admin-user"></span>
+        </div>
+      </header>
+
+      <section id="section-dashboard" class="panel active">
+        <div class="stats-grid" id="stats-grid"></div>
+
+        <div class="quick-actions">
+          <h3>Hızlı İşlemler</h3>
+          <div class="quick-actions-grid">
+            <button type="button" class="quick-btn" data-quick-section="ai-automation">
+              <span class="quick-icon">🤖</span>
+              <span class="quick-label">AI Otomasyon</span>
+              <span class="quick-desc">Kategori tara</span>
+            </button>
+            <button type="button" class="quick-btn" data-quick-section="words" data-quick-focus="ai-words-input">
+              <span class="quick-icon">✨</span>
+              <span class="quick-label">AI Kelime Ekle</span>
+              <span class="quick-desc">Otomatik analiz</span>
+            </button>
+            <button type="button" class="quick-btn" data-quick-action="add-word">
+              <span class="quick-icon">➕</span>
+              <span class="quick-label">Manuel Kelime</span>
+              <span class="quick-desc">Yeni kayıt</span>
+            </button>
+            <button type="button" class="quick-btn" data-quick-section="words">
+              <span class="quick-icon">📚</span>
+              <span class="quick-label">Kelimeler</span>
+              <span class="quick-desc">Liste & filtre</span>
+            </button>
+            <button type="button" class="quick-btn" data-quick-section="cases">
+              <span class="quick-icon">🔄</span>
+              <span class="quick-label">Haller</span>
+              <span class="quick-desc">Alıştırmalar</span>
+            </button>
+            <a href="/index.html" class="quick-btn quick-link" target="_blank" rel="noopener">
+              <span class="quick-icon">🌐</span>
+              <span class="quick-label">Uygulama</span>
+              <span class="quick-desc">Önizleme aç</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h3>Canlı güncelleme</h3>
+          <p>Panelden yaptığınız değişiklikler anında API'ye yansır. Uygulama bir sonraki açılışta veya sayfa yenilemede güncel içeriği çeker.</p>
+        </div>
+      </section>
+
+      <section id="section-ai-automation" class="panel">
+        <div class="ai-box automation-box">
+          <h3>🔄 Kategori Otomasyonu</h3>
+          <p class="ai-desc auto-desc">Bir kategori yazın (örn: <b>Günler</b>) — AI mevcut kelimeleri tarar, eksikleri bulur, çevirileri ve hal alıştırmalarını önerir.</p>
+
+          <div class="auto-form">
+            <div class="auto-field">
+              <label>Kategori</label>
+              <input type="text" id="auto-category-input" list="category-suggestions" placeholder="Günler, Aylar, Hayvanlar...">
+              <datalist id="category-suggestions"></datalist>
+            </div>
+            <label class="auto-check">
+              <input type="checkbox" id="auto-include-cases" checked>
+              Hal alıştırmaları da üret (Akkusativ, Dativ...)
+            </label>
+          </div>
+
+          <div class="ai-actions">
+            <button type="button" class="btn btn-primary" id="auto-scan-btn">🔍 Tara &amp; Eksikleri Bul</button>
+            <button type="button" class="btn btn-ghost hidden" id="auto-apply-btn">💾 Eksikleri Kaydet</button>
+          </div>
+          <p id="auto-status" class="ai-status"></p>
+        </div>
+
+        <div id="auto-report" class="auto-report hidden">
+          <div class="auto-stats" id="auto-stats"></div>
+          <p id="auto-summary" class="auto-summary"></p>
+
+          <div class="auto-columns">
+            <div class="auto-col">
+              <h4>✅ Mevcut (<span id="auto-existing-count">0</span>)</h4>
+              <ul id="auto-existing-list" class="auto-list"></ul>
+            </div>
+            <div class="auto-col highlight">
+              <h4>➕ Eksik (<span id="auto-missing-count">0</span>)</h4>
+              <div id="auto-missing-list" class="auto-results"></div>
+            </div>
+          </div>
+
+          <div id="auto-cases-block" class="hidden">
+            <h4>🔄 Önerilen Hal Alıştırmaları (<span id="auto-cases-count">0</span>)</h4>
+            <div id="auto-cases-list" class="auto-results"></div>
+          </div>
+
+          <div id="auto-suggestions-block" class="hidden">
+            <h4>💡 Öneriler</h4>
+            <ul id="auto-suggestions-list" class="auto-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-words" class="panel">
+        <div class="ai-box">
+          <h3>🤖 AI ile Otomatik Kelime Ekle</h3>
+          <p class="ai-desc">Almanca kelime(leri) yazın — AI artikeli, kategoriyi ve tüm dillerdeki çevirileri otomatik doldurur.</p>
+          <textarea id="ai-words-input" rows="3" placeholder="Örn: Haus, Apfel, Universität&#10;veya her satıra bir kelime"></textarea>
+          <div class="ai-actions">
+            <button type="button" class="btn btn-primary" id="ai-analyze-btn">✨ AI ile Analiz Et</button>
+            <button type="button" class="btn btn-ghost hidden" id="ai-save-all-btn">💾 Hepsini Kaydet</button>
+          </div>
+          <p id="ai-status" class="ai-status"></p>
+          <div id="ai-results" class="ai-results"></div>
+        </div>
+        <div class="words-filters">
+          <div class="words-filters-row">
+            <input type="search" id="words-search" placeholder="Kelime, çeviri, kategori ara...">
+            <select id="words-filter-category" title="Kategori">
+              <option value="">Tüm kategoriler</option>
+            </select>
+            <select id="words-filter-article" title="Artikel">
+              <option value="">Tüm artikeller</option>
+              <option value="der">der</option>
+              <option value="die">die</option>
+              <option value="das">das</option>
+            </select>
+            <select id="words-filter-difficulty" title="Zorluk">
+              <option value="">Tüm zorluklar</option>
+              <option value="1">Kolay (1)</option>
+              <option value="2">Orta (2)</option>
+              <option value="3">Zor (3)</option>
+            </select>
+          </div>
+          <div class="words-filters-row">
+            <select id="words-filter-status" title="Durum">
+              <option value="">Tüm durumlar</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Pasif</option>
+            </select>
+            <select id="words-filter-exception" title="İstisna">
+              <option value="">İstisna: hepsi</option>
+              <option value="yes">Sadece istisnalar</option>
+              <option value="no">İstisna değil</option>
+            </select>
+            <select id="words-filter-sort" title="Sıralama">
+              <option value="word-asc">Kelime A→Z</option>
+              <option value="word-desc">Kelime Z→A</option>
+              <option value="category-asc">Kategori A→Z</option>
+              <option value="tr-asc">Türkçe A→Z</option>
+              <option value="difficulty-asc">Zorluk ↑</option>
+              <option value="difficulty-desc">Zorluk ↓</option>
+            </select>
+            <span id="words-filter-count" class="filter-count">—</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="words-filter-clear">Temizle</button>
+            <button class="btn btn-primary" data-action="add" data-resource="words">+ Manuel Kelime</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="table-words"></table></div>
+      </section>
+
+      <section id="section-suffix-rules" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="suffix-rules">+ Yeni Kural</button>
+        </div>
+        <div class="table-wrap"><table id="table-suffix-rules"></table></div>
+      </section>
+
+      <section id="section-category-rules" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="category-rules">+ Yeni Kategori</button>
+        </div>
+        <div class="table-wrap"><table id="table-category-rules"></table></div>
+      </section>
+
+      <section id="section-exceptions" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="exceptions">+ Yeni İstisna</button>
+        </div>
+        <div class="table-wrap"><table id="table-exceptions"></table></div>
+      </section>
+
+      <section id="section-cases" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="cases">+ Yeni Alıştırma</button>
+        </div>
+        <div class="table-wrap"><table id="table-cases"></table></div>
+      </section>
+
+      <section id="section-achievements" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="achievements">+ Yeni Başarı</button>
+        </div>
+        <div class="table-wrap"><table id="table-achievements"></table></div>
+      </section>
+
+      <section id="section-daily-tips" class="panel">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add" data-resource="daily-tips">+ Yeni İpucu</button>
+        </div>
+        <div class="table-wrap"><table id="table-daily-tips"></table></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="modal-title">Düzenle</h3>
+      <form id="modal-form"></form>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modal-cancel">İptal</button>
+        <button type="submit" form="modal-form" class="btn btn-primary">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="admin.js"></script>
+</body>
+</html>
