@@ -14,8 +14,9 @@ function buildTranslations(body) {
     tr: body.tr ?? fromJson.tr ?? '',
     en: body.en ?? fromJson.en ?? '',
     de: body.de ?? fromJson.de ?? body.word ?? '',
-    uk: body.uk ?? fromJson.uk ?? body.tr ?? fromJson.tr ?? '',
-    ar: body.ar ?? fromJson.ar ?? body.tr ?? fromJson.tr ?? ''
+    // Eksik çeviri boş bırakılır (Türkçe ile doldurulmaz); istemci İngilizceye düşer
+    uk: body.uk ?? fromJson.uk ?? '',
+    ar: body.ar ?? fromJson.ar ?? ''
   };
   return translations;
 }

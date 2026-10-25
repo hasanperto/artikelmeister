@@ -1,27 +1,36 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { db, bumpContentVersion } = require('../db');
+const { db, bumpContentVersion, nextWordId } = require('../db');
 const { authMiddleware, signToken } = require('../middleware/auth');
+const { createLoginLimiter } = require('../security');
+const { validateWord, validateGeneric } = require('../validate');
 const { syncWordTranslations, mapWordRow } = require('../words-helper');
-const { analyzeWordsWithAI, getAiStatus } = require('../ai-word');
+const { analyzeWordsWithAI, getAiStatus, fillMissingTranslations, findWordsMissingTranslations } = require('../ai-word');
 const { auditCategory, applyAuditResults, getCategoryCatalog, resolveCategory } = require('../ai-automation');
 
 const router = express.Router();
+const loginLimiter = createLoginLimiter();
+
+// Bcrypt karşılaştırmasını kullanıcı yokken de çalıştır (zamanlama ile kullanıcı adı tahmini engellenir)
+const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', 10);
 
 function parseBody(req) {
   return req.body || {};
 }
 
 // ── Auth ──
-router.post('/login', (req, res) => {
+router.post('/login', loginLimiter.middleware, (req, res) => {
   const { username, password } = parseBody(req);
-  if (!username || !password) {
+  if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
     return res.status(400).json({ error: 'Kullanıcı adı ve şifre gerekli' });
   }
   const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
-  if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+  const ok = bcrypt.compareSync(password, admin?.password_hash || DUMMY_HASH);
+  if (!admin || !ok) {
+    loginLimiter.fail(req);
     return res.status(401).json({ error: 'Geçersiz giriş bilgileri' });
   }
+  loginLimiter.reset(req);
   const token = signToken({ id: admin.id, username: admin.username });
   res.json({ token, username: admin.username });
 });
@@ -46,7 +55,7 @@ router.get('/stats', authMiddleware, (_req, res) => {
 
 // ── Generic CRUD helper ──
 function crudRoutes(config) {
-  const { table, fields, jsonFields = [], idField = 'id', beforeSave, mapRow } = config;
+  const { table, fields, jsonFields = [], idField = 'id', beforeSave, mapRow, validate } = config;
 
   router.get(`/${config.path}`, authMiddleware, (_req, res) => {
     const rows = db.prepare(`SELECT * FROM ${table} ORDER BY ${idField}`).all();
@@ -65,16 +74,15 @@ function crudRoutes(config) {
 
   router.post(`/${config.path}`, authMiddleware, (req, res) => {
     let body = { ...parseBody(req) };
+    const errors = validate ? validate(body, { partial: false }) : [];
+    if (errors.length) return res.status(400).json({ error: errors.join('; ') });
     if (beforeSave) body = beforeSave(body);
 
-    let cols = fields.filter((f) => body[f] !== undefined);
-    if (!cols.length) return res.status(400).json({ error: 'Boş veri' });
+    // Kelime ID'si her zaman sunucuda üretilir (silinen ID'ler tekrar kullanılmaz)
+    if (table === 'words') body.id = nextWordId();
 
-    if (table === 'words' && body.id === undefined) {
-      const max = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
-      body.id = max + 1;
-      if (!cols.includes('id')) cols = ['id', ...cols];
-    }
+    const cols = fields.filter((f) => body[f] !== undefined);
+    if (!cols.length) return res.status(400).json({ error: 'Boş veri' });
 
     const values = cols.map((c) => {
       if (jsonFields.includes(c) && typeof body[c] === 'object') {
@@ -94,9 +102,17 @@ function crudRoutes(config) {
 
   router.put(`/${config.path}/:id`, authMiddleware, (req, res) => {
     let body = { ...parseBody(req) };
-    if (beforeSave) body = beforeSave(body);
+    const errors = validate ? validate(body, { partial: true }) : [];
+    if (errors.length) return res.status(400).json({ error: errors.join('; ') });
+    if (beforeSave) {
+      // Kısmi güncellemede mevcut çevirilerin kaybolmaması için kayıtla birleştir
+      const existing = db.prepare(`SELECT * FROM ${table} WHERE ${idField} = ?`).get(req.params.id);
+      if (!existing) return res.status(404).json({ error: 'Kayıt bulunamadı' });
+      body = beforeSave({ ...existing, ...body });
+    }
 
-    const cols = fields.filter((f) => body[f] !== undefined);
+    // Birincil anahtar güncellenemez
+    const cols = fields.filter((f) => f !== idField && body[f] !== undefined);
     if (!cols.length) return res.status(400).json({ error: 'Güncellenecek alan yok' });
 
     const sets = cols.map((c) => `${c} = ?`).join(', ');
@@ -130,6 +146,7 @@ crudRoutes({
   idField: 'id',
   mapRow: mapWordRow,
   beforeSave: syncWordTranslations,
+  validate: validateWord,
   fields: [
     'id', 'word', 'article', 'tr', 'en', 'translations_json',
     'category', 'difficulty', 'suffix', 'is_exception', 'active'
@@ -140,20 +157,23 @@ crudRoutes({
 crudRoutes({
   path: 'suffix-rules',
   table: 'suffix_rules',
-  fields: ['article', 'suffix', 'example', 'desc', 'priority', 'active']
+  fields: ['article', 'suffix', 'example', 'desc', 'priority', 'active'],
+  validate: (b) => validateGeneric(b, { articleFields: ['article'] })
 });
 
 crudRoutes({
   path: 'category-rules',
   table: 'category_rules',
   fields: ['article', 'category', 'examples_json', 'icon', 'priority', 'active'],
-  jsonFields: ['examples_json']
+  jsonFields: ['examples_json'],
+  validate: (b) => validateGeneric(b, { articleFields: ['article'], arrayFields: ['examples_json'] })
 });
 
 crudRoutes({
   path: 'exceptions',
   table: 'exceptions',
-  fields: ['word', 'article', 'category', 'icon', 'active']
+  fields: ['word', 'article', 'category', 'icon', 'active'],
+  validate: (b) => validateGeneric(b, { articleFields: ['article'] })
 });
 
 crudRoutes({
@@ -163,7 +183,8 @@ crudRoutes({
     'sentence_pre', 'word', 'suffix', 'sentence_post', 'tr', 'base_article',
     'declined_article', 'declined_noun', 'case_name', 'focus_word', 'explanation',
     'active', 'sort_order'
-  ]
+  ],
+  validate: (b) => validateGeneric(b, { articleFields: ['base_article'] })
 });
 
 crudRoutes({
@@ -245,8 +266,21 @@ router.post('/ai/save-words', authMiddleware, (req, res) => {
   `);
 
   const saved = [];
+  const skipped = [];
+  const exists = db.prepare('SELECT 1 FROM words WHERE LOWER(word) = LOWER(?) AND article = ?');
   const tx = db.transaction(() => {
     words.forEach((raw) => {
+      const tr = raw.tr || raw.translations?.tr;
+      const en = raw.en || raw.translations?.en;
+      const errors = validateWord({ ...raw, tr, en });
+      if (errors.length) {
+        skipped.push({ word: raw.word, reason: errors.join('; ') });
+        return;
+      }
+      if (exists.get(raw.word, raw.article)) {
+        skipped.push({ word: raw.word, reason: 'zaten kayıtlı' });
+        return;
+      }
       const body = syncWordTranslations({
         word: raw.word,
         article: raw.article,
@@ -260,8 +294,7 @@ router.post('/ai/save-words', authMiddleware, (req, res) => {
         suffix: raw.suffix || null,
         is_exception: raw.is_exception ? 1 : 0
       });
-      const max = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
-      body.id = max + 1;
+      body.id = nextWordId();
       insert.run(body);
       saved.push(body.id);
     });
@@ -269,8 +302,23 @@ router.post('/ai/save-words', authMiddleware, (req, res) => {
 
   try {
     tx();
-    bumpContentVersion();
-    res.json({ ok: true, saved, count: saved.length });
+    if (saved.length) bumpContentVersion();
+    res.json({ ok: true, saved, skipped, count: saved.length });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ── AI Eksik Çeviri Doldurma (uk/ar) ──
+router.get('/ai/missing-translations', authMiddleware, (_req, res) => {
+  res.json({ total: findWordsMissingTranslations(0).total });
+});
+
+router.post('/ai/fill-translations', authMiddleware, async (req, res) => {
+  try {
+    const result = await fillMissingTranslations(parseBody(req).batchSize);
+    if (result.updated) bumpContentVersion();
+    res.json({ ok: true, ...result });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

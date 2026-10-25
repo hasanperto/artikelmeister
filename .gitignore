@@ -10,3 +10,10 @@ Thumbs.db
 npm-debug.log*
 .idea/
 .vscode/
+
+# Mobil (Capacitor) derleme çıktıları
+www/
+dist/
+android/keystore.properties
+*.jks
+*.keystore

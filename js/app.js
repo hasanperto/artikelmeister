@@ -3,6 +3,17 @@
 // Profil, combo, ipuçları, çoklu dil (i18n)
 // ============================================
 
+// İçerik (API / AI kaynaklı) HTML'e basılmadan önce kaçırılır
+function esc(val) {
+    return String(val ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+// onclick="..." içinde güvenli JS string argümanı
+function jsArg(val) {
+    return esc(JSON.stringify(String(val ?? '')));
+}
+
 const AVATARS = ['🧑‍🎓', '👨‍💻', '👩‍🏫', '🦊', '🐻', '🦉', '🐱', '🐶', '🦁', '🐨', '🎮', '🎯', '⭐', '🚀', '🌟', '👑', '💎', '🔥', '🌈', '🎪'];
 const MOTIVATIONS = {
     tr: ['Bugün harika bir gün Almanca öğrenmek için! 🌟', 'Her doğru cevap seni bir adım ileriye taşır! 🚀', 'Artikel ustası olma yolunda ilerliyorsun! 💪', 'Pratik mükemmelleştirir! 🎯', 'Kombo serisi kır, bonus XP kazan! 🔥', 'Küçük adımlar, büyük sonuçlar! ⭐', 'Almanca artikeller artık kolay! 🇩🇪'],
@@ -114,6 +125,19 @@ const App = {
         this.lang.renderLoginBar();
         this.lang.renderModal();
 
+        const cfg = window.ARTIKEL_CONFIG || {};
+        if (cfg.version) {
+            const content = window.CONTENT_META?.version ? ` · DB v${window.CONTENT_META.version}` : '';
+            document.getElementById('app-version').textContent = `ArtikelMeister v${cfg.version} (${cfg.versionCode})${content}`;
+        }
+
+        this.textSize.init();
+        const autoSpeak = document.getElementById('auto-speak-toggle');
+        if (autoSpeak && window.Speech) {
+            autoSpeak.checked = Speech.autoEnabled();
+            autoSpeak.addEventListener('change', () => Speech.setAuto(autoSpeak.checked));
+        }
+
         this.profiles.loadAll();
         const lastId = localStorage.getItem('artikelmeister_lastProfile');
         const profiles = this.profiles.getAll();
@@ -122,6 +146,58 @@ const App = {
             this.profiles.select(lastId, true);
         } else {
             this.profiles.showLogin();
+        }
+    },
+
+    // ══════════════════════════
+    // AKILLI TEKRAR ARAYÜZÜ (js/srs.js)
+    // ══════════════════════════
+    srsUI: {
+        render() {
+            if (!App.progress || !window.SRS || !window.DB?.words) return;
+            const sum = SRS.summary(App.progress, DB.words);
+            const badge = document.getElementById('quiz-due-badge');
+            if (badge) {
+                badge.textContent = i18n.t('srs_due_badge', { n: sum.due });
+                badge.classList.toggle('hidden', sum.due === 0);
+            }
+            const summary = document.getElementById('srs-summary');
+            if (!summary) return;
+            summary.textContent = i18n.t('srs_stats', { mastered: sum.mastered, due: sum.due });
+            const weak = SRS.weakWords(App.progress, DB.words, 8);
+            const list = document.getElementById('weak-list');
+            list.innerHTML = weak.length
+                ? weak.map(w => {
+                    const s = SRS.statsFor(App.progress, w.id);
+                    return `<button type="button" class="weak-chip ${esc(w.article)}" onclick="Speech.speak(${jsArg(w.article + ' ' + w.word)})">${esc(w.article)} ${esc(w.word)} <span class="weak-count">✗${esc(s.wrong)}</span></button>`;
+                }).join('')
+                : `<div class="settings-desc">${esc(i18n.t('weak_empty'))}</div>`;
+            document.getElementById('weak-practice-btn').classList.toggle('hidden', weak.length === 0);
+        }
+    },
+
+    // ══════════════════════════
+    // TEXT SIZE (js/display-scale.js)
+    // ══════════════════════════
+    textSize: {
+        init() {
+            const box = document.getElementById('text-size-options');
+            if (!box || !window.DisplayScale) return;
+            box.addEventListener('click', (e) => {
+                const btn = e.target.closest('.text-size-btn');
+                if (!btn) return;
+                DisplayScale.set(btn.dataset.size);
+            });
+            window.addEventListener('textsizechange', () => this.render());
+            this.render();
+        },
+        render() {
+            const level = window.DisplayScale?.getLevel();
+            document.querySelectorAll('.text-size-btn').forEach((b) => {
+                const on = b.dataset.size === level;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-checked', on ? 'true' : 'false');
+            });
         }
     },
 
@@ -161,7 +237,7 @@ const App = {
             }
             if (App.currentSection === 'learn') App.learn.render();
             if (App.currentSection === 'rules') App.rules.render();
-            if (App.currentSection === 'profile') App.profile.renderAchievements();
+            if (App.currentSection === 'profile') { App.profile.renderAchievements(); window.AICoach?.renderKeys(); }
             App.showToast('✅ ' + i18n.languages.find(l => l.code === code).name, 'success');
         },
 
@@ -210,13 +286,13 @@ const App = {
 
             profiles.forEach(([id, p]) => {
                 html += `
-          <div class="profile-slot" onclick="App.profiles.select('${id}')">
-            <div class="profile-avatar">${p.avatar}</div>
+          <div class="profile-slot" onclick="App.profiles.select(${jsArg(id)})">
+            <div class="profile-avatar">${esc(p.avatar)}</div>
             <div class="profile-info">
-              <div class="profile-name">${p.name}</div>
+              <div class="profile-name">${esc(p.name)}</div>
               <div class="profile-meta">${i18n.t('level')} ${p.progress.level} · ${p.progress.xp} XP · ${p.progress.wordsLearned.length} ${i18n.t('profile_words')}</div>
             </div>
-            <button class="profile-delete" onclick="event.stopPropagation();App.profiles.remove('${id}')">✕</button>
+            <button class="profile-delete" onclick="event.stopPropagation();App.profiles.remove(${jsArg(id)})">✕</button>
           </div>`;
             });
 
@@ -274,6 +350,7 @@ const App = {
         select(id, skipSplash) {
             App.currentProfile = id;
             const profile = this.data[id];
+            profile.progress = { ...App.getDefaultProgress(), ...profile.progress };
             App.progress = profile.progress;
             localStorage.setItem('artikelmeister_lastProfile', id);
 
@@ -317,14 +394,25 @@ const App = {
         }
     },
 
+    // Sunucudan yeni içerik geldiğinde (api-loader) ekranı tazele; oyun ortasındaki sorular değişmez
+    onContentUpdated() {
+        if (!this.progress) return;
+        this.updateUI();
+        if (this.currentSection === 'learn') this.learn.render();
+        if (this.currentSection === 'rules') this.rules.render();
+        this.profile.renderAchievements();
+        this.showToast(i18n.t('content_updated'), 'success');
+    },
+
     // ── HELPERS ──
     getWordTranslation(w, lang) {
         if (!w) return '';
         if (w.translations?.[lang]) return w.translations[lang];
         if (lang === 'de') return w.de || w.word;
         if (lang === 'en') return w.en;
-        if (lang === 'uk') return w.uk || w.tr;
-        if (lang === 'ar') return w.ar || w.tr;
+        // Çeviri yoksa Türkçe yerine İngilizceye düş
+        if (lang === 'uk') return w.uk || w.en || w.tr;
+        if (lang === 'ar') return w.ar || w.en || w.tr;
         return w.tr;
     },
 
@@ -348,7 +436,8 @@ const App = {
             totalCorrect: 0, totalWrong: 0,
             gamesPlayed: 0, bestStreak: 0,
             bestSpeed: 0, totalCombo: 0,
-            achievements: [], rulesRead: []
+            achievements: [], rulesRead: [],
+            wordStats: {}
         };
     },
 
@@ -421,6 +510,7 @@ const App = {
 
     // ── UI UPDATE ──
     updateUI() {
+        this.srsUI.render();
         const p = this.progress;
         const lv = DB.levels[p.level - 1];
         const nlv = DB.levels[p.level] || DB.levels[DB.levels.length - 1];
@@ -474,6 +564,11 @@ const App = {
 
     // ── NAVIGATION ──
     navigate(section) {
+        // Hız modundan çıkılırken sayaç arka planda çalışmaya devam etmesin
+        if (this.currentSection === 'speed' && section !== 'speed' && this.speed.running) {
+            this.speed.running = false; clearInterval(this.speed.timer);
+        }
+        if (this.currentSection === 'ai' && section !== 'ai') window.AICoach?.leave();
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(`section-${section}`).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -482,8 +577,9 @@ const App = {
         this.currentSection = section;
         if (section === 'quiz') this.quiz.init();
         if (section === 'speed') this.speed.reset();
-        if (section === 'profile') this.profile.renderAchievements();
+        if (section === 'profile') { this.profile.renderAchievements(); window.AICoach?.renderKeys(); }
         if (section === 'cases') this.cases.init();
+        if (section === 'ai') window.AICoach?.open();
         if (section === 'rules' && !this.progress.rulesRead.includes('rules')) {
             this.progress.rulesRead.push('rules');
             this.saveProgress();
@@ -701,12 +797,12 @@ const App = {
                     const sortedCats = [...DB.categoryRules[article]].sort((a, b) => (b.priority || 0) - (a.priority || 0));
                     sortedCats.forEach((cat, i) => {
                         html += `
-                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showCategoryExamples('${cat.category}', '${article}')">
+                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showCategoryExamples(${jsArg(cat.category)}, '${article}')">
                             <div class="rule-card-header" style="margin-bottom:0; border-bottom:none; padding:8px 0; justify-content:center; position:relative;">
-                                <span class="rule-suffix" style="font-size:24px; border-radius:12px; border:none; background:none; padding:0;">${cat.icon}</span>
-                                <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${cat.priority || 0}</span>
+                                <span class="rule-suffix" style="font-size:24px; border-radius:12px; border:none; background:none; padding:0;">${esc(cat.icon)}</span>
+                                <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${esc(cat.priority || 0)}</span>
                             </div>
-                            <div style="font-size:11px; text-align:center; color:var(--text-muted); opacity:0.8; margin-top:5px; font-weight:700;">${cat.category}</div>
+                            <div style="font-size:11px; text-align:center; color:var(--text-muted); opacity:0.8; margin-top:5px; font-weight:700;">${esc(cat.category)}</div>
                             <div style="text-align:center; margin-top:8px; font-size:12px; font-weight:700; color:var(--accent);">${i18n.t('learn_view_examples')}</div>
                         </div>`;
                     });
@@ -716,12 +812,12 @@ const App = {
                     const sortedSuffixes = [...DB.suffixRules[article]].sort((a, b) => (b.priority || 0) - (a.priority || 0));
                     sortedSuffixes.forEach((s, i) => {
                         html += `
-                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showSuffixExamples('${s.suffix}', '${article}')">
+                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showSuffixExamples(${jsArg(s.suffix)}, '${article}')">
                             <div class="rule-card-header" style="margin-bottom:0; border-bottom:none; padding:8px 0; justify-content:center; position:relative;">
-                                <span class="rule-suffix ${article}" style="font-size:20px">${s.suffix}</span>
-                                <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${s.priority || 0}</span>
+                                <span class="rule-suffix ${article}" style="font-size:20px">${esc(s.suffix)}</span>
+                                <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${esc(s.priority || 0)}</span>
                             </div>
-                            <div style="font-size:11px; text-align:center; color:var(--text-muted); opacity:0.8; margin-top:5px;">${s.desc}</div>
+                            <div style="font-size:11px; text-align:center; color:var(--text-muted); opacity:0.8; margin-top:5px;">${esc(s.desc)}</div>
                             <div style="text-align:center; margin-top:8px; font-size:12px; font-weight:700; color:var(--accent);">${i18n.t('learn_view_examples')}</div>
                         </div>`;
                     });
@@ -772,10 +868,13 @@ const App = {
                 card.style.animation = 'wordEnter 0.4s ease-out';
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:18px; font-weight:800; color:var(--${w.article}-color);">${w.article} ${w.word}</span>
-                        <span style="font-size:12px; padding:3px 8px; background:rgba(255,255,255,0.05); border-radius:8px;">${suffix}</span>
+                        <span style="font-size:18px; font-weight:800; color:var(--${esc(w.article)}-color);">${esc(w.article)} ${esc(w.word)}</span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:12px; padding:3px 8px; background:rgba(255,255,255,0.05); border-radius:8px;">${esc(suffix)}</span>
+                            <button type="button" class="speak-btn small" onclick="Speech.speak(${jsArg(w.article + ' ' + w.word)})" aria-label="🔊">🔊</button>
+                        </span>
                     </div>
-                    <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${App.getWordTranslation(w, i18n.currentLang)}</div>
+                    <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${esc(App.getWordTranslation(w, i18n.currentLang))}</div>
                 `;
                 listEl.appendChild(card);
             });
@@ -819,8 +918,11 @@ const App = {
                 const wrd = parts.slice(1).join(' ');
 
                 card.innerHTML = `
-                    <span style="font-size:18px; font-weight:800; color:var(--${art}-color);">${ex}</span>
-                    <div style="font-size:13px; color:var(--text-muted); opacity:0.7; margin-top:5px;">${i18n.t('learn_category_group', { category: catName })}</div>
+                    <span style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:18px; font-weight:800; color:var(--${esc(art)}-color);">${esc(ex)}</span>
+                        <button type="button" class="speak-btn small" onclick="Speech.speak(${jsArg(ex)})" aria-label="🔊">🔊</button>
+                    </span>
+                    <div style="font-size:13px; color:var(--text-muted); opacity:0.7; margin-top:5px;">${esc(i18n.t('learn_category_group', { category: catName }))}</div>
                 `;
                 listEl.appendChild(card);
             });
@@ -842,10 +944,13 @@ const App = {
     // ══════════════════════════
     quiz: {
         questions: [], current: 0, correct: 0, wrong: 0, streak: 0, comboBonusXP: 0, answered: false,
+        nextMode: 'normal',
 
         init() {
-            const shuffled = [...DB.words].sort(() => Math.random() - 0.5);
-            this.questions = shuffled.slice(0, 10);
+            // 'weak' yalnızca bir sonraki quiz için geçerli; tekrar dene normal quiz başlatır
+            const weak = this.nextMode === 'weak' ? SRS.weakWords(App.progress, DB.words, 10) : [];
+            this.nextMode = 'normal';
+            this.questions = (weak.length ? weak : SRS.pickQuiz(App.progress, DB.words, 10)).map(w => ({ ...w }));
             this.current = 0; this.correct = 0; this.wrong = 0; this.streak = 0; this.comboBonusXP = 0; this.answered = false;
             this.renderProgress(); this.showQuestion();
             App.showCombo(0);
@@ -854,7 +959,7 @@ const App = {
         renderProgress() {
             const c = document.getElementById('quiz-progress');
             let html = '';
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < this.questions.length; i++) {
                 let cls = '';
                 if (i < this.current) cls = this.questions[i]._correct ? 'correct' : 'wrong';
                 else if (i === this.current) cls = 'current';
@@ -864,7 +969,7 @@ const App = {
         },
 
         showQuestion() {
-            if (this.current >= 10) { this.showResults(); return; }
+            if (this.current >= this.questions.length) { this.showResults(); return; }
             this.answered = false;
             const q = this.questions[this.current];
             const container = document.getElementById('quiz-word-container');
@@ -881,7 +986,7 @@ const App = {
 
             document.getElementById('quiz-translation').textContent =
                 lang === 'de' ? primary : `${primary} · ${secondary}`;
-            document.getElementById('quiz-category').innerHTML = `📁 ${q.category}`;
+            document.getElementById('quiz-category').innerHTML = `📁 ${esc(q.category)}`;
             document.getElementById('quiz-correct').textContent = this.correct;
             document.getElementById('quiz-wrong').textContent = this.wrong;
             document.getElementById('quiz-streak-val').textContent = this.streak;
@@ -914,6 +1019,8 @@ const App = {
             const q = this.questions[this.current];
             const isCorrect = article === q.article;
             q._correct = isCorrect;
+            SRS.record(App.progress, q.id, isCorrect);
+            if (Speech.autoEnabled()) Speech.speak(`${q.article} ${q.word}`);
 
             if (isCorrect) {
                 this.correct++; this.streak++;
@@ -946,10 +1053,11 @@ const App = {
             App.progress.gamesPlayed++;
             App.recordPlay(); App.showCombo(0);
 
+            const total = this.questions.length || 1;
             const baseXP = this.correct * 10;
-            const perfectBonus = this.correct === 10 ? 50 : 0;
+            const perfectBonus = this.correct === total && total >= 10 ? 50 : 0;
             const xp = baseXP + perfectBonus + this.comboBonusXP;
-            const pct = Math.round((this.correct / 10) * 100);
+            const pct = Math.round((this.correct / total) * 100);
 
             let emoji = '😊', title = i18n.t('results_try');
             if (pct === 100) { emoji = '🏆'; title = i18n.t('results_perfect'); }
@@ -959,7 +1067,7 @@ const App = {
 
             document.getElementById('results-emoji').textContent = emoji;
             document.getElementById('results-title').textContent = title;
-            document.getElementById('results-subtitle').textContent = `${this.correct}/10 ${i18n.t('results_correct_answers')}`;
+            document.getElementById('results-subtitle').textContent = `${this.correct}/${total} ${i18n.t('results_correct_answers')}`;
             document.getElementById('results-xp').textContent = `+${xp} XP`;
 
             document.getElementById('results-stats').innerHTML = `
@@ -973,11 +1081,24 @@ const App = {
             document.getElementById('results-retry').onclick = () => { document.getElementById('results').classList.add('hidden'); App.quiz.init(); };
 
             App.addXP(xp);
-            if (pct === 100) { App.checkAchievement('perfect_10'); App.launchConfetti(); }
+            if (pct === 100 && total >= 10) App.checkAchievement('perfect_10');
+            if (pct === 100) App.launchConfetti();
+            App.srsUI.render();
             if (App.progress.gamesPlayed === 1) App.checkAchievement('first_step');
             App.checkStreakAchievements();
             App.checkArticleAchievements();
             if (App.progress.level >= 10) App.checkAchievement('level_10');
+        },
+
+        // Cevaptan önce yalnızca kelime (artikel ipucu vermemek için), sonra artikeliyle
+        speak() {
+            const q = this.questions[this.current];
+            if (q) Speech.speak(this.answered ? `${q.article} ${q.word}` : q.word);
+        },
+
+        startWeak() {
+            this.nextMode = 'weak';
+            App.navigate('quiz');
         },
 
         quit() { App.showCombo(0); App.navigate('home'); }
@@ -1037,6 +1158,7 @@ const App = {
         answer(article) {
             if (!this.running) return;
             const correct = article === this.currentWord.article;
+            SRS.record(App.progress, this.currentWord.id, correct);
             if (correct) {
                 this.score++; this.streak++;
                 document.getElementById('speed-score').textContent = this.score;
@@ -1108,23 +1230,23 @@ const App = {
                 DB.exceptions.forEach((exc, i) => {
                     const color = exc.article === 'der' ? 'var(--der-color)' : exc.article === 'die' ? 'var(--die-color)' : 'var(--das-color)';
                     html += `<div class="rule-card" style="border-left:3px solid ${color};animation-delay:${i * 0.06}s">
-            <div class="rule-card-header"><span style="font-size:26px">${exc.icon}</span><span class="rule-suffix" style="color:${color}">${exc.article} ${exc.word}</span>
+            <div class="rule-card-header"><span style="font-size:26px">${esc(exc.icon)}</span><span class="rule-suffix" style="color:${color}">${esc(exc.article)} ${esc(exc.word)}</span>
             <span class="exception-badge">⚠️ ${i18n.t('exception')}</span></div>
-            <div class="rule-example">${exc.category}</div></div>`;
+            <div class="rule-example">${esc(exc.category)}</div></div>`;
                 });
             } else {
                 const a = this.currentTab;
                 html += `<div style="margin-bottom:16px;font-weight:800;font-size:19px">${i18n.t('rules_suffix_title')}</div>`;
                 DB.suffixRules[a].forEach((s, i) => {
                     html += `<div class="rule-card" style="animation-delay:${i * 0.05}s">
-            <div class="rule-card-header"><span class="rule-suffix ${a}">${s.suffix}</span><span style="color:var(--text-muted)">→ ${a}</span></div>
-            <div class="rule-example"><span>${s.example}</span> — ${s.desc}</div></div>`;
+            <div class="rule-card-header"><span class="rule-suffix ${a}">${esc(s.suffix)}</span><span style="color:var(--text-muted)">→ ${a}</span></div>
+            <div class="rule-example"><span>${esc(s.example)}</span> — ${esc(s.desc)}</div></div>`;
                 });
                 html += `<div style="margin:28px 0 16px;font-weight:800;font-size:19px">${i18n.t('rules_category_title')}</div>`;
                 DB.categoryRules[a].forEach((cat, i) => {
                     html += `<div class="category-card" style="animation-delay:${i * 0.06}s">
-            <div class="category-header"><span class="category-icon">${cat.icon}</span><span class="category-title">${cat.category}</span></div>
-            <div class="category-examples">${cat.examples.map(e => `<span class="category-tag ${a}">${e}</span>`).join('')}</div></div>`;
+            <div class="category-header"><span class="category-icon">${esc(cat.icon)}</span><span class="category-title">${esc(cat.category)}</span></div>
+            <div class="category-examples">${cat.examples.map(e => `<span class="category-tag ${a}">${esc(e)}</span>`).join('')}</div></div>`;
                 });
             }
             c.innerHTML = html;
@@ -1197,10 +1319,10 @@ const App = {
                 card.style.gap = '15px';
                 card.style.animation = 'wordEnter 0.4s ease-out';
                 card.innerHTML = `
-                    <div style="font-size:24px; min-width:60px; text-align:center; white-space:pre-line; line-height:1.1;">${ex.icon}</div>
+                    <div style="font-size:24px; min-width:60px; text-align:center; white-space:pre-line; line-height:1.1;">${esc(ex.icon)}</div>
                     <div>
-                        <div style="font-weight:bold; color:var(--text-primary); font-size:16px;">${ex.text}</div>
-                        <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${ex.tr}</div>
+                        <div style="font-weight:bold; color:var(--text-primary); font-size:16px;">${esc(ex.text)}</div>
+                        <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${esc(ex.tr)}</div>
                     </div>
                 `;
                 listEl.appendChild(card);
@@ -1240,39 +1362,39 @@ const App = {
             document.getElementById('cases-wrong').textContent = this.wrong;
             document.getElementById('cases-streak').textContent = this.streak;
 
-            let wordHtml = ex.word;
+            let wordHtml = esc(ex.word);
             if (ex.suffix) {
                 const idx = ex.word.lastIndexOf(ex.suffix);
                 if (idx !== -1) {
                     const basePart = ex.word.substring(0, idx);
-                    wordHtml = basePart + `<span class="case-suffix ${ex.baseArticle}">${ex.suffix}</span>`;
+                    wordHtml = esc(basePart) + `<span class="case-suffix ${esc(ex.baseArticle)}">${esc(ex.suffix)}</span>`;
                 }
             }
 
-            let preHtml = ex.sentencePre;
+            let preHtml = esc(ex.sentencePre);
             if (ex.focusWord) {
-                preHtml = preHtml.replace(ex.focusWord, `<span class="case-focus-word">${ex.focusWord}</span>`);
+                preHtml = preHtml.replace(esc(ex.focusWord), `<span class="case-focus-word">${esc(ex.focusWord)}</span>`);
             }
 
             let html = `
             <div class="case-card">
               <div style="font-size:14px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; font-weight:700;">
-                ❖ ${ex.caseName} ❖
+                ❖ ${esc(ex.caseName)} ❖
               </div>
               <div class="case-sentence">
                 <span>${preHtml}</span>
                 <span class="case-blank" id="case-blank-el">––</span>
-                <span class="case-noun">${ex.declinedNoun || wordHtml}</span>
-                <span>${ex.sentencePost || ''}</span>
+                <span class="case-noun">${ex.declinedNoun ? esc(ex.declinedNoun) : wordHtml}</span>
+                <span>${esc(ex.sentencePost || '')}</span>
               </div>
               <div style="font-size:13px; color:var(--text-muted); margin-top:8px;">
-                (${ex.tr})
+                (${esc(ex.tr)})
               </div>
               <div class="case-explanation" id="case-explanation-el">
-                ${ex.explanation}
+                ${esc(ex.explanation)}
               </div>
               <div id="case-hint-text" style="font-size:12px; color:var(--text-muted); margin-top:12px;">
-                <span class="case-hint" onclick="App.showToast('${i18n.t('cases_hint')}: ${ex.baseArticle} ${ex.word}')" style="cursor:pointer; display:inline-block; padding:5px; background:rgba(255,255,255,0.1); border-radius:5px;">💡 ${i18n.t('quiz_hint_btn')}</span>
+                <span class="case-hint" onclick="App.showToast(${jsArg(`${i18n.t('cases_hint')}: ${ex.baseArticle} ${ex.word}`)})" style="cursor:pointer; display:inline-block; padding:5px; background:rgba(255,255,255,0.1); border-radius:5px;">💡 ${i18n.t('quiz_hint_btn')}</span>
               </div>
             </div>`;
 
@@ -1295,7 +1417,7 @@ const App = {
             let optionsArr = Array.from(options).sort(() => Math.random() - 0.5);
 
             opts.innerHTML = optionsArr.map(opt => `
-              <button class="article-btn" style="background:var(--bg-glass); color:white" onclick="App.cases.answer('${opt}', this)">${opt}</button>
+              <button class="article-btn" style="background:var(--bg-glass); color:white" onclick="App.cases.answer(${jsArg(opt)}, this)">${esc(opt)}</button>
             `).join('');
         },
 
@@ -1405,10 +1527,10 @@ const App = {
             DB.achievements.forEach(ach => {
                 const unlocked = App.progress.achievements.includes(ach.id);
                 html += `<div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-          <div class="achievement-icon">${ach.icon}</div>
-          <div class="achievement-title">${ach.title}</div>
-          <div class="achievement-desc">${ach.desc}</div>
-          <div class="achievement-xp">${unlocked ? i18n.t('achievement_unlocked') : `${i18n.t('achievement_locked')} ${ach.xp} XP`}</div></div>`;
+          <div class="achievement-icon">${esc(ach.icon)}</div>
+          <div class="achievement-title">${esc(ach.title)}</div>
+          <div class="achievement-desc">${esc(ach.desc)}</div>
+          <div class="achievement-xp">${unlocked ? i18n.t('achievement_unlocked') : `${i18n.t('achievement_locked')} ${esc(ach.xp)} XP`}</div></div>`;
             });
             grid.innerHTML = html;
         }

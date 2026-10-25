@@ -3,7 +3,8 @@
 // Almanca Artikel Öğrenme Veritabanı
 // ============================================
 
-const DB = {
+// var: window.DB olarak erişilebilir ve çevrimiçi içerik geldiğinde değiştirilebilir
+var DB = {
   // ── SUFFIX RULES ──
   suffixRules: {
     der: [

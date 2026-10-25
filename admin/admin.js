@@ -6,7 +6,6 @@ const SCHEMAS = {
     title: 'Kelime',
     columns: ['id', 'word', 'article', 'tr', 'en', 'uk', 'ar', 'category', 'active'],
     fields: [
-      { name: 'id', label: 'ID', type: 'number' },
       { name: 'word', label: 'Kelime (DE)', required: true },
       { name: 'article', label: 'Artikel', type: 'select', options: ['der', 'die', 'das'], required: true },
       { name: 'tr', label: '🇹🇷 Türkçe', required: true },
@@ -128,6 +127,12 @@ let wordsCache = [];
 let aiPreviewWords = [];
 let lastAudit = null;
 
+function esc(val) {
+  return String(val ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
 function token() { return localStorage.getItem(TOKEN_KEY); }
 function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken() { localStorage.removeItem(TOKEN_KEY); }
@@ -173,7 +178,10 @@ function switchSection(section) {
   document.getElementById(`section-${section}`)?.classList.add('active');
   document.getElementById('page-title').textContent = TITLES[section] || section;
   if (section !== 'dashboard') loadTable(section);
-  if (section === 'ai-automation') loadCategorySuggestions();
+  if (section === 'ai-automation') {
+    loadCategorySuggestions();
+    loadMissingTranslations();
+  }
   closeMobileMenu();
 }
 
@@ -247,20 +255,20 @@ function handleQuickAction(el) {
 
 function formatCell(key, val) {
   if (key === 'article' || key === 'base_article' || key === 'declined_article') {
-    return `<span class="tag ${val}">${val}</span>`;
+    return `<span class="tag ${esc(val)}">${esc(val)}</span>`;
   }
   if (key === 'active') return val ? '✅' : '<span class="tag off">pasif</span>';
   if (key === 'category') {
     const s = String(val || '');
     if (!s) return '—';
     const label = CATEGORY_LABELS[s] || s;
-    return `${label} <span style="opacity:.45;font-size:11px">${s}</span>`;
+    return `${esc(label)} <span style="opacity:.45;font-size:11px">${esc(s)}</span>`;
   }
   if (key === 'text' || key === 'explanation') {
     const s = String(val || '');
-    return s.length > 60 ? s.slice(0, 60) + '…' : s;
+    return esc(s.length > 60 ? s.slice(0, 60) + '…' : s);
   }
-  return val ?? '—';
+  return val == null ? '—' : esc(val);
 }
 
 function getWordsFilters() {
@@ -321,7 +329,7 @@ function populateWordsFilterOptions(rows) {
     (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b, 'tr')
   );
   sel.innerHTML = '<option value="">Tüm kategoriler</option>' +
-    cats.map((c) => `<option value="${c}">${CATEGORY_LABELS[c] || c} (${counts[c]})</option>`).join('');
+    cats.map((c) => `<option value="${esc(c)}">${esc(CATEGORY_LABELS[c] || c)} (${counts[c]})</option>`).join('');
   if (cats.includes(current)) sel.value = current;
 }
 
@@ -347,8 +355,8 @@ function renderWordsTable() {
         <tr>
           ${schema.columns.map((c) => `<td>${formatCell(c, row[c])}</td>`).join('')}
           <td class="actions">
-            <button class="btn btn-sm btn-ghost" data-edit="words" data-id="${row.id}">Düzenle</button>
-            <button class="btn btn-sm btn-danger" data-delete="words" data-id="${row.id}">Sil</button>
+            <button class="btn btn-sm btn-ghost" data-edit="words" data-id="${esc(row.id)}">Düzenle</button>
+            <button class="btn btn-sm btn-danger" data-delete="words" data-id="${esc(row.id)}">Sil</button>
           </td>
         </tr>
       `).join('') : '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Sonuç bulunamadı</td></tr>'}
@@ -399,8 +407,8 @@ async function loadTable(resource) {
         <tr>
           ${schema.columns.map((c) => `<td>${formatCell(c, row[c])}</td>`).join('')}
           <td class="actions">
-            <button class="btn btn-sm btn-ghost" data-edit="${resource}" data-id="${row[idField]}">Düzenle</button>
-            <button class="btn btn-sm btn-danger" data-delete="${resource}" data-id="${row[idField]}">Sil</button>
+            <button class="btn btn-sm btn-ghost" data-edit="${resource}" data-id="${esc(row[idField])}">Düzenle</button>
+            <button class="btn btn-sm btn-danger" data-delete="${resource}" data-id="${esc(row[idField])}">Sil</button>
           </td>
         </tr>
       `).join('')}
@@ -423,20 +431,20 @@ function openModal(resource, row = null) {
     const val = rowData ? rowData[f.name] : (f.type === 'checkbox' ? 1 : '');
     if (f.type === 'select') {
       return `<label>${f.label}<select name="${f.name}" ${f.required ? 'required' : ''}>
-        ${f.options.map((o) => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+        ${f.options.map((o) => `<option value="${esc(o)}" ${val === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}
       </select></label>`;
     }
     if (f.type === 'textarea') {
       const tv = f.name === 'examples_json' && row?.examples_json
         ? (typeof row.examples_json === 'string' ? row.examples_json : JSON.stringify(row.examples_json))
         : (val ?? '');
-      return `<label>${f.label}<textarea name="${f.name}" ${f.required ? 'required' : ''} placeholder="${f.placeholder || ''}">${tv}</textarea></label>`;
+      return `<label>${f.label}<textarea name="${f.name}" ${f.required ? 'required' : ''} placeholder="${esc(f.placeholder || '')}">${esc(tv)}</textarea></label>`;
     }
     if (f.type === 'checkbox') {
       const checked = val === 1 || val === true;
       return `<label><input type="checkbox" name="${f.name}" ${checked ? 'checked' : ''}> ${f.label}</label>`;
     }
-    return `<label>${f.label}<input name="${f.name}" type="${f.type || 'text'}" value="${val ?? ''}" ${f.required ? 'required' : ''}></label>`;
+    return `<label>${f.label}<input name="${f.name}" type="${f.type || 'text'}" value="${esc(val ?? '')}" ${f.required ? 'required' : ''}></label>`;
   }).join('');
   document.getElementById('modal').classList.remove('hidden');
 }
@@ -471,11 +479,6 @@ async function saveModal(e) {
   const { resource, id } = modalState;
   const schema = SCHEMAS[resource];
   const body = collectFormData(e.target, schema);
-
-  if (resource === 'words' && !id && !body.id) {
-    const maxId = wordsCache.reduce((m, w) => Math.max(m, w.id), 0);
-    body.id = maxId + 1;
-  }
 
   try {
     if (id) {
@@ -599,18 +602,18 @@ function renderAiResults(words, warning) {
   box.innerHTML = words.map((w) => `
     <div class="ai-card">
       <div class="ai-card-head">
-        <span class="tag ${w.article}">${w.article}</span>
-        <span class="ai-card-word">${w.word}</span>
-        <span style="font-size:12px;color:var(--muted)">📁 ${w.category} · zorluk ${w.difficulty}</span>
-        ${w.suffix ? `<span style="font-size:11px">${w.suffix}</span>` : ''}
+        <span class="tag ${esc(w.article)}">${esc(w.article)}</span>
+        <span class="ai-card-word">${esc(w.word)}</span>
+        <span style="font-size:12px;color:var(--muted)">📁 ${esc(w.category)} · zorluk ${esc(w.difficulty)}</span>
+        ${w.suffix ? `<span style="font-size:11px">${esc(w.suffix)}</span>` : ''}
         ${w.is_exception ? '<span class="tag off">istisna</span>' : ''}
       </div>
       <div class="ai-trans-grid">
         ${['tr','en','de','uk','ar'].map((lang) => `
-          <div class="ai-trans-item"><strong>${lang}</strong>${w.translations?.[lang] || w[lang] || '—'}</div>
+          <div class="ai-trans-item"><strong>${lang}</strong>${esc(w.translations?.[lang] || w[lang] || '—')}</div>
         `).join('')}
       </div>
-      ${w.reason ? `<div class="ai-card-reason">💡 ${w.reason}</div>` : ''}
+      ${w.reason ? `<div class="ai-card-reason">💡 ${esc(w.reason)}</div>` : ''}
     </div>
   `).join('');
   document.getElementById('ai-status').textContent = warning || `${words.length} kelime hazır — kontrol edip kaydedin.`;
@@ -622,7 +625,7 @@ async function loadCategorySuggestions() {
   try {
     const cats = await api('/ai/categories');
     dl.innerHTML = cats.map((c) =>
-      `<option value="${c.label}">${c.label} (${c.wordCount} kelime)</option>`
+      `<option value="${esc(c.label)}">${esc(c.label)} (${esc(c.wordCount)} kelime)</option>`
     ).join('');
   } catch { /* */ }
 }
@@ -635,15 +638,15 @@ function renderAuditReport(audit) {
 
   const cov = audit.coverage || {};
   document.getElementById('auto-stats').innerHTML = `
-    <div class="auto-stat"><div class="val">${cov.percent ?? 0}%</div><div class="lbl">Kapsam</div></div>
-    <div class="auto-stat"><div class="val">${cov.existing ?? 0}</div><div class="lbl">Mevcut</div></div>
-    <div class="auto-stat"><div class="val">${cov.missing ?? 0}</div><div class="lbl">Eksik</div></div>
+    <div class="auto-stat"><div class="val">${esc(cov.percent ?? 0)}%</div><div class="lbl">Kapsam</div></div>
+    <div class="auto-stat"><div class="val">${esc(cov.existing ?? 0)}</div><div class="lbl">Mevcut</div></div>
+    <div class="auto-stat"><div class="val">${esc(cov.missing ?? 0)}</div><div class="lbl">Eksik</div></div>
     <div class="auto-stat"><div class="val">${(audit.suggestedCases || []).length}</div><div class="lbl">Hal</div></div>
   `;
   document.getElementById('auto-summary').textContent = audit.summary || '';
   document.getElementById('auto-existing-count').textContent = (audit.existing || []).length;
   document.getElementById('auto-existing-list').innerHTML = (audit.existing || [])
-    .map((w) => `<li>${w.article} ${w.word} — ${w.tr || ''}</li>`).join('') || '<li>—</li>';
+    .map((w) => `<li>${esc(w.article)} ${esc(w.word)} — ${esc(w.tr || '')}</li>`).join('') || '<li>—</li>';
 
   const missing = audit.missingWords || [];
   document.getElementById('auto-missing-count').textContent = missing.length;
@@ -651,15 +654,15 @@ function renderAuditReport(audit) {
     ? missing.map((w) => `
       <div class="ai-card">
         <div class="ai-card-head">
-          <span class="tag ${w.article}">${w.article}</span>
-          <span class="ai-card-word">${w.word}</span>
+          <span class="tag ${esc(w.article)}">${esc(w.article)}</span>
+          <span class="ai-card-word">${esc(w.word)}</span>
         </div>
         <div class="ai-trans-grid">
           ${['tr','en','de','uk','ar'].map((lang) => `
-            <div class="ai-trans-item"><strong>${lang}</strong>${w.translations?.[lang] || w[lang] || '—'}</div>
+            <div class="ai-trans-item"><strong>${lang}</strong>${esc(w.translations?.[lang] || w[lang] || '—')}</div>
           `).join('')}
         </div>
-        ${w.reason ? `<div class="ai-card-reason">💡 ${w.reason}</div>` : ''}
+        ${w.reason ? `<div class="ai-card-reason">💡 ${esc(w.reason)}</div>` : ''}
       </div>
     `).join('')
     : '<p style="color:var(--muted);font-size:13px">Eksik kelime yok 🎉</p>';
@@ -671,10 +674,10 @@ function renderAuditReport(audit) {
     document.getElementById('auto-cases-count').textContent = cases.length;
     document.getElementById('auto-cases-list').innerHTML = cases.map((c) => `
       <div class="auto-case-card">
-        <span class="case-name">${c.case_name}</span>
-        <div class="sentence">${c.sentence_pre} <b>${c.declined_article}</b> ${c.word}${c.sentence_post || ''}</div>
-        <div style="color:var(--muted)">${c.tr}</div>
-        <div style="font-size:11px;margin-top:4px">${c.explanation || ''}</div>
+        <span class="case-name">${esc(c.case_name)}</span>
+        <div class="sentence">${esc(c.sentence_pre)} <b>${esc(c.declined_article)}</b> ${esc(c.word)}${esc(c.sentence_post || '')}</div>
+        <div style="color:var(--muted)">${esc(c.tr)}</div>
+        <div style="font-size:11px;margin-top:4px">${esc(c.explanation || '')}</div>
       </div>
     `).join('');
   } else {
@@ -685,7 +688,7 @@ function renderAuditReport(audit) {
   const sugBlock = document.getElementById('auto-suggestions-block');
   if (suggestions.length) {
     sugBlock.classList.remove('hidden');
-    document.getElementById('auto-suggestions-list').innerHTML = suggestions.map((s) => `<li>${s}</li>`).join('');
+    document.getElementById('auto-suggestions-list').innerHTML = suggestions.map((s) => `<li>${esc(s)}</li>`).join('');
   } else {
     sugBlock.classList.add('hidden');
   }
@@ -733,7 +736,9 @@ document.getElementById('auto-apply-btn')?.addEventListener('click', async () =>
       method: 'POST',
       body: JSON.stringify({ audit: lastAudit, saveWords: true, saveCases: true })
     });
-    toast(`✅ ${result.wordsSaved || 0} kelime, ${result.casesSaved || 0} hal kaydedildi`);
+    const skipped = (result.skippedWords?.length || 0) + (result.skippedCases?.length || 0);
+    toast(`✅ ${result.wordsSaved || 0} kelime, ${result.casesSaved || 0} hal kaydedildi${skipped ? ` · ${skipped} atlandı` : ''}`);
+    if (skipped) console.info('Atlanan kayıtlar:', result.skippedWords, result.skippedCases);
     document.getElementById('auto-status').textContent = 'Kayıt tamamlandı';
     document.getElementById('auto-apply-btn').classList.add('hidden');
     loadVersion();
@@ -770,16 +775,57 @@ document.getElementById('ai-save-all-btn')?.addEventListener('click', async () =
       method: 'POST',
       body: JSON.stringify({ words: aiPreviewWords })
     });
-    toast(`✅ ${result.count} kelime kaydedildi`);
+    const skipped = result.skipped || [];
+    toast(`✅ ${result.count} kelime kaydedildi${skipped.length ? ` · ${skipped.length} atlandı` : ''}`);
+    if (skipped.length) {
+      document.getElementById('ai-status').textContent = 'Atlananlar: ' + skipped.map((x) => `${x.word} (${x.reason})`).join(', ');
+    }
     document.getElementById('ai-words-input').value = '';
     document.getElementById('ai-results').innerHTML = '';
-    document.getElementById('ai-status').textContent = '';
+    if (!skipped.length) document.getElementById('ai-status').textContent = '';
     document.getElementById('ai-save-all-btn').classList.add('hidden');
     aiPreviewWords = [];
     loadTable('words');
     loadVersion();
   } catch (err) {
     toast(err.message);
+  }
+});
+
+async function loadMissingTranslations() {
+  const status = document.getElementById('fill-trans-status');
+  if (!status) return;
+  try {
+    const { total } = await api('/ai/missing-translations');
+    status.textContent = total ? `${total} kelimede eksik çeviri var.` : '✓ Tüm kelimelerin çevirileri tam.';
+  } catch { /* */ }
+}
+
+document.getElementById('fill-trans-btn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('fill-trans-btn');
+  const status = document.getElementById('fill-trans-status');
+  btn.disabled = true;
+  let done = 0;
+  try {
+    // Parti parti doldur; AI ilerleme sağlamazsa dur (sonsuz döngü olmasın)
+    for (;;) {
+      status.textContent = `⏳ Çeviriler dolduruluyor... (${done} güncellendi)`;
+      const result = await api('/ai/fill-translations', { method: 'POST', body: JSON.stringify({ batchSize: 15 }) });
+      done += result.updated;
+      if (!result.remaining || !result.updated) {
+        status.textContent = result.remaining
+          ? `⚠️ ${done} güncellendi, ${result.remaining} kelime AI tarafından doldurulamadı.`
+          : `✓ ${done} kelime güncellendi, eksik çeviri kalmadı.`;
+        break;
+      }
+    }
+    toast(`🌍 ${done} kelimenin çevirisi dolduruldu`);
+    loadVersion();
+  } catch (err) {
+    status.textContent = `❌ Hata: ${err.message} (${done} güncellendi)`;
+    toast(err.message);
+  } finally {
+    btn.disabled = false;
   }
 });
 
@@ -793,9 +839,9 @@ async function init() {
       const ai = await api('/ai/status');
       const hint = document.querySelector('.ai-desc');
       if (hint && !ai.configured) {
-        hint.innerHTML += ' <span style="color:#F59E0B">⚠️ MINIMAX_API_KEY tanımlı değil — sadece kural tabanlı tahmin yapılır.</span>';
+        hint.innerHTML += ' <span style="color:#F59E0B">⚠️ AI anahtarı tanımlı değil (GEMINI_API_KEY, ANTHROPIC_API_KEY veya MINIMAX_API_KEY) — sadece kural tabanlı tahmin yapılır.</span>';
       } else if (hint && ai.configured) {
-        hint.innerHTML += ` <span style="color:#4ADE80">✓ AI: ${ai.provider} (${ai.model})</span>`;
+        hint.innerHTML += ` <span style="color:#4ADE80">✓ AI: ${esc(ai.provider)} (${esc(ai.model)})</span>`;
       }
     } catch { /* */ }
   } catch {

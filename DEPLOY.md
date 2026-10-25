@@ -71,13 +71,18 @@ cp .env.example .env
 nano .env
 ```
 
-**Production için mutlaka değiştirin:**
+**Production için mutlaka değiştirin** (`NODE_ENV=production` iken bu değerler eksik veya zayıfsa sunucu **başlamaz**):
+
+```bash
+# Güçlü JWT_SECRET üretin (en az 32 karakter)
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
 
 ```env
 PORT=3000
 JWT_SECRET=uzun-rastgele-guclu-anahtar-buraya
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=guclu-sifre-buraya
+ADMIN_PASSWORD=guclu-sifre-buraya   # en az 10 karakter, admin123 vb. olamaz
 
 AI_PROVIDER=minimax
 MINIMAX_API_KEY=sk-...
@@ -251,7 +256,8 @@ cp /var/www/artikelmeister/server/data/artikelmeister.db \
 | `better-sqlite3` kurulum hatası | `apt install build-essential python3` |
 | AI tarama 400 hatası | `.env` içinde `MINIMAX_API_KEY` kontrol edin |
 | 502 Bad Gateway | `pm2 status` — uygulama çalışıyor mu? |
-| Admin giriş olmuyor | `ADMIN_USERNAME` / `ADMIN_PASSWORD` ve JWT_SECRET |
+| Admin giriş olmuyor | `ADMIN_USERNAME` / `ADMIN_PASSWORD` ve JWT_SECRET; 5 hatalı denemeden sonra IP 15 dk kilitlenir (429) |
+| Sunucu açılmıyor, "Güvenlik yapılandırması hatalı" | `.env` içinde güçlü `JWT_SECRET` ve `ADMIN_PASSWORD` tanımlayın, `pm2 restart` |
 | Veri kayboldu | `server/data/` yedekten geri yükleyin |
 
 Loglar:

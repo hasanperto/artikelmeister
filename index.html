@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ArtikelMeister — Almanca Artikel Öğren</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/display-scale.js"></script>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🇩🇪</text></svg>">
 </head>
@@ -171,6 +172,14 @@
       <!-- Mode Selection -->
       <div class="section-title"><span class="gradient-text" data-i18n="modes_title">Modlar</span></div>
       <div class="mode-grid">
+        <div class="mode-card ai" onclick="App.navigate('ai')">
+          <div class="mode-icon">🤖</div>
+          <div class="mode-info">
+            <div class="mode-title" data-i18n="mode_ai">AI Koç</div>
+            <div class="mode-desc" data-i18n="mode_ai_desc">Gemini · Claude · MiniMax ile kişisel öğretmen</div>
+          </div>
+          <div class="mode-arrow">›</div>
+        </div>
         <div class="mode-card learn mini-tutorial" onclick="App.navigate('learn')">
           <div class="mode-icon">📚</div>
           <div class="mode-info">
@@ -183,7 +192,7 @@
         <div class="mode-card quiz" onclick="App.navigate('quiz')">
           <div class="mode-icon">🎯</div>
           <div class="mode-info">
-            <div class="mode-title" data-i18n="mode_quiz">Quiz</div>
+            <div class="mode-title"><span data-i18n="mode_quiz">Quiz</span> <span class="mode-badge hidden" id="quiz-due-badge"></span></div>
             <div class="mode-desc" data-i18n="mode_quiz_desc">10 soruluk pratik + combo bonusları</div>
           </div>
           <div class="mode-arrow">›</div>
@@ -239,7 +248,7 @@
         <p id="suffix-examples-desc" style="font-size:14px; color:var(--text-muted); margin-bottom:20px;"></p>
 
         <div id="suffix-examples-list"
-          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:12px; margin-top:10px;">
+          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap:12px; margin-top:10px;">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -252,7 +261,10 @@
         <div class="quiz-progress" id="quiz-progress"></div>
         <div class="quiz-word-container" id="quiz-word-container">
           <div class="quiz-question-mark" data-i18n="quiz_question">HANGİ ARTİKEL?</div>
-          <div class="quiz-word" id="quiz-word">––</div>
+          <div class="quiz-word-row">
+            <div class="quiz-word" id="quiz-word">––</div>
+            <button type="button" class="speak-btn" id="quiz-speak" onclick="App.quiz.speak()" aria-label="Sesli dinle">🔊</button>
+          </div>
           <div class="quiz-translation" id="quiz-translation"></div>
           <div class="quiz-category" id="quiz-category"></div>
           <div class="quiz-hint" id="quiz-hint" onclick="App.quiz.showHint()" style="display:none"
@@ -442,13 +454,20 @@
         <h2 id="examples-title" style="font-weight:800; margin-bottom:12px; color:var(--accent);">Örnekler</h2>
 
         <div id="examples-list"
-          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:12px; margin-top:20px;">
+          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap:12px; margin-top:20px;">
           <!-- Populated by JS -->
         </div>
       </div>
     </section>
 
     <!-- PROFILE -->
+    <section class="section" id="section-ai">
+      <button class="back-btn" onclick="App.navigate('home')" data-i18n="back">← Geri</button>
+      <div class="section-title"><span class="gradient-text" data-i18n="ai_title">🤖 AI Koç</span></div>
+      <div class="section-subtitle" data-i18n="ai_subtitle">Yapay zekâ destekli kişisel artikel öğretmenin</div>
+      <div id="ai-view"></div>
+    </section>
+
     <section class="section" id="section-profile">
       <div class="profile-header" id="profile-header-card">
         <div class="profile-avatar-large" id="profile-avatar-large">👤</div>
@@ -508,6 +527,47 @@
         </div>
       </div>
 
+      <div class="settings-card">
+        <div class="settings-title" data-i18n="weak_title">🧠 Zayıf kelimelerim</div>
+        <div class="srs-summary" id="srs-summary"></div>
+        <div class="weak-list" id="weak-list"></div>
+        <button type="button" class="btn btn-primary hidden" id="weak-practice-btn" onclick="App.quiz.startWeak()"
+          data-i18n="weak_practice">🎯 Bunları çalış</button>
+      </div>
+
+      <div class="settings-card speech-setting">
+        <label class="toggle-row">
+          <span data-i18n="speech_auto">🔊 Cevaptan sonra sesli oku</span>
+          <input type="checkbox" id="auto-speak-toggle">
+        </label>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title" data-i18n="ai_keys_title">🔑 AI anahtarlarım</div>
+        <div class="settings-desc" data-i18n="ai_keys_desc">Kendi Gemini, Claude veya MiniMax anahtarını ekle: AI Koç sunucu olmadan doğrudan bu telefondan çalışır.</div>
+        <div id="ai-keys"></div>
+        <div class="settings-desc ai-keys-privacy" data-i18n="ai_keys_privacy">🔒 Anahtar yalnızca bu cihazda saklanır, yedeğe eklenmez ve sadece ilgili AI şirketine gönderilir. Kullanım ücreti senin hesabına yansır.</div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title" data-i18n="backup_title">💾 Yedekleme</div>
+        <div class="settings-desc" data-i18n="backup_desc">İlerlemeni dosyaya kaydet, telefon değiştirince geri yükle.</div>
+        <div class="backup-actions">
+          <button type="button" class="btn btn-secondary" onclick="Backup.exportBackup()" data-i18n="backup_export">📤 Dışa aktar</button>
+          <button type="button" class="btn btn-secondary" onclick="Backup.pickAndImport()" data-i18n="backup_import">📥 İçe aktar</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-title" data-i18n="text_size">🔤 Yazı boyutu</div>
+        <div class="text-size-options" id="text-size-options" role="radiogroup">
+          <button type="button" class="text-size-btn" data-size="small" role="radio"><span class="ts-a" style="font-size:13px">A</span><span data-i18n="text_size_small">Küçük</span></button>
+          <button type="button" class="text-size-btn" data-size="normal" role="radio"><span class="ts-a" style="font-size:16px">A</span><span data-i18n="text_size_normal">Normal</span></button>
+          <button type="button" class="text-size-btn" data-size="large" role="radio"><span class="ts-a" style="font-size:19px">A</span><span data-i18n="text_size_large">Büyük</span></button>
+          <button type="button" class="text-size-btn" data-size="xlarge" role="radio"><span class="ts-a" style="font-size:22px">A</span><span data-i18n="text_size_xlarge">Çok büyük</span></button>
+        </div>
+      </div>
+
       <div class="section-title" style="font-size:20px" data-i18n="achievements_title">🏆 Başarılar</div>
       <div class="achievement-grid" id="achievements-grid"></div>
 
@@ -515,6 +575,7 @@
         data-i18n="profile_switch">👤 Profil Değiştir</button>
       <button class="btn btn-danger" onclick="App.resetProgress()" style="margin-top:10px" data-i18n="profile_reset">🗑️
         İlerlemeyi Sıfırla</button>
+      <div class="app-version" id="app-version"></div>
     </section>
   </div>
 
@@ -532,8 +593,14 @@
         class="nav-icon">👤</span><span class="nav-label" data-i18n="nav_profile">Profil</span></button>
   </nav>
 
+  <script src="js/config.js"></script>
   <script src="data/i18n.js"></script>
+  <script src="js/srs.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/backup.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/ai-coach.js"></script>
+  <script src="js/native.js"></script>
   <script src="js/api-loader.js"></script>
 </body>
 

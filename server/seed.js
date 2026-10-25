@@ -1,7 +1,8 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const legacyDB = require('../data/database.js');
-const { db, getMeta, setMeta, bumpContentVersion } = require('./db');
+const { db, getMeta, setMeta, syncWordIdSeq } = require('./db');
+const { syncWordTranslations } = require('./words-helper');
 
 const DAILY_TIPS_SEED = {
   tr: [
@@ -108,13 +109,7 @@ function seedIfEmpty() {
         article: w.article,
         tr: w.tr,
         en: w.en,
-        translations_json: JSON.stringify({
-          tr: w.tr,
-          en: w.en,
-          de: w.word,
-          uk: w.tr,
-          ar: w.tr
-        }),
+        translations_json: syncWordTranslations({ word: w.word, tr: w.tr, en: w.en }).translations_json,
         category: w.category || 'general',
         difficulty: w.difficulty || 1,
         suffix: w.suffix || null,
@@ -175,6 +170,7 @@ function seedIfEmpty() {
     setMeta('content_version', '1');
     setMeta('updated_at', new Date().toISOString());
     setMeta('seeded', '1');
+    syncWordIdSeq();
   });
 
   tx();

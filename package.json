@@ -6,17 +6,41 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "seed": "node server/seed.js"
+    "seed": "node server/seed.js",
+    "fonts": "node scripts/vendor-fonts.js",
+    "icons": "node scripts/make-icons.js && capacitor-assets generate --android --iconBackgroundColor #0a0a1a --iconBackgroundColorDark #0a0a1a --splashBackgroundColor #0a0a1a --splashBackgroundColorDark #0a0a1a",
+    "mobile:sync": "node scripts/build-mobile.js && cap sync android",
+    "apk:keystore": "node scripts/make-keystore.js",
+    "apk:debug": "node scripts/build-apk.js debug",
+    "apk": "node scripts/build-apk.js release",
+    "ai:bundle": "node scripts/build-ai-core.js"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@capacitor-community/text-to-speech": "^8.0.2",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/text-zoom": "^8.0.1",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "esbuild": "^0.28.2"
   }
 }

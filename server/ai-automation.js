@@ -1,4 +1,5 @@
-const { db, bumpContentVersion } = require('./db');
+const { db, bumpContentVersion, nextWordId } = require('./db');
+const { validateWord, validateCase } = require('./validate');
 const { syncWordTranslations, LANGS } = require('./words-helper');
 const { callChatAI, CATEGORIES, getSuffixHints, getAiConfig } = require('./ai-word');
 
@@ -286,12 +287,15 @@ JSON:
     { role: 'user', content: userPrompt }
   ]);
 
-  const missing = (result.missing_words || [])
+  const missing = (Array.isArray(result.missing_words) ? result.missing_words : [])
+    .filter((w) => w && typeof w.word === 'string' && w.word.trim())
     .filter((w) => !info.existingWords.some((e) => e.word.toLowerCase() === w.word?.toLowerCase()))
     .slice(0, maxNewWords)
     .map((w) => mapMissingWord(w, info.key));
 
-  const cases = (result.case_exercises || []).map(mapCaseExercise);
+  const cases = (Array.isArray(result.case_exercises) ? result.case_exercises : [])
+    .filter((c) => c && typeof c === 'object')
+    .map(mapCaseExercise);
 
   return formatAuditResponse(info, {
     provider: cfg.provider,
@@ -332,7 +336,7 @@ function buildRuleBasedAudit(info, includeCases) {
       }, info.key);
     }),
     case_exercises: [],
-    suggestions: ['MINIMAX_API_KEY ekleyerek tam otomasyonu aktifleştirin', 'Eksik kelimeleri AI ile analiz edip çevirileri doldurun'],
+    suggestions: ['GEMINI_API_KEY, ANTHROPIC_API_KEY veya MINIMAX_API_KEY ekleyerek tam otomasyonu aktifleştirin', 'Eksik kelimeleri AI ile analiz edip çevirileri doldurun'],
     aiUsed: false
   });
 }
@@ -403,11 +407,21 @@ function applyAuditResults(audit, options = {}) {
   `);
 
   const tx = db.transaction(() => {
-    if (saveWords && payload.missing_words?.length) {
+    if (saveWords && Array.isArray(payload.missing_words)) {
       payload.missing_words.forEach((raw) => {
+        if (!raw || typeof raw !== 'object') return;
+        const errors = validateWord({
+          ...raw,
+          tr: raw.tr || raw.translations?.tr,
+          en: raw.en || raw.translations?.en
+        });
+        if (errors.length) {
+          skippedWords.push({ word: raw.word || '?', reason: errors.join('; ') });
+          return;
+        }
         const exists = db.prepare('SELECT id FROM words WHERE LOWER(word) = ?').get(raw.word.toLowerCase());
         if (exists) {
-          skippedWords.push(raw.word);
+          skippedWords.push({ word: raw.word, reason: 'zaten kayıtlı' });
           return;
         }
         const body = syncWordTranslations({
@@ -423,16 +437,22 @@ function applyAuditResults(audit, options = {}) {
           suffix: raw.suffix || null,
           is_exception: raw.is_exception ? 1 : 0
         });
-        const max = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
-        body.id = max + 1;
+        body.id = nextWordId();
         insertWord.run(body);
         savedWords.push({ id: body.id, word: body.word });
       });
     }
 
-    if (saveCases && payload.case_exercises?.length) {
+    if (saveCases && Array.isArray(payload.case_exercises)) {
       const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) AS m FROM cases_exercises').get().m;
-      payload.case_exercises.forEach((c, i) => {
+      payload.case_exercises.forEach((raw, i) => {
+        if (!raw || typeof raw !== 'object') return;
+        const c = mapCaseExercise(raw);
+        const errors = validateCase(c);
+        if (errors.length) {
+          skippedCases.push({ word: c.word || '?', reason: errors.join('; ') });
+          return;
+        }
         const dup = db.prepare(`
           SELECT id FROM cases_exercises
           WHERE LOWER(word) = ? AND case_name = ? AND declined_article = ? AND sentence_pre = ?
@@ -443,7 +463,7 @@ function applyAuditResults(audit, options = {}) {
           c.sentence_pre
         );
         if (dup) {
-          skippedCases.push(c.word);
+          skippedCases.push({ word: c.word, reason: 'zaten kayıtlı' });
           return;
         }
         insertCase.run({ ...c, sort_order: maxOrder + i + 1 });
@@ -453,7 +473,7 @@ function applyAuditResults(audit, options = {}) {
   });
 
   tx();
-  bumpContentVersion();
+  if (savedWords.length || savedCases.length) bumpContentVersion();
 
   return {
     savedWords,

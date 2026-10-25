@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ArtikelMeister</string>
+    <string name="title_activity_main">ArtikelMeister</string>
+    <string name="package_name">com.artikelmeister.app</string>
+    <string name="custom_url_scheme">com.artikelmeister.app</string>
+</resources>

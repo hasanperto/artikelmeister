@@ -1,5 +1,6 @@
 const { db } = require('./db');
 const { LANGS } = require('./words-helper');
+const providers = require('./ai-providers');
 
 const CATEGORIES = [
   'people', 'family', 'profession', 'animals', 'furniture', 'school',
@@ -28,132 +29,23 @@ function parseWordList(input) {
   )];
 }
 
+// Sağlayıcı seçimi ve çağrılar ortak katmanda (Gemini, Claude, MiniMax, OpenAI)
 function resolveAiProvider() {
-  const forced = (process.env.AI_PROVIDER || '').toLowerCase();
-  if (forced === 'minimax' || forced === 'openai') return forced;
-  if (process.env.MINIMAX_API_KEY) return 'minimax';
-  if (process.env.OPENAI_API_KEY) return 'openai';
-  return null;
+  return providers.resolveProvider();
 }
 
 function getAiConfig() {
-  const provider = resolveAiProvider();
-  if (provider === 'minimax') {
-    return {
-      provider: 'minimax',
-      apiKey: process.env.MINIMAX_API_KEY,
-      baseUrl: (process.env.MINIMAX_BASE_URL || 'https://api.minimax.io/v1').replace(/\/$/, ''),
-      model: process.env.MINIMAX_MODEL || 'MiniMax-M3'
-    };
-  }
-  if (provider === 'openai') {
-    return {
-      provider: 'openai',
-      apiKey: process.env.OPENAI_API_KEY,
-      baseUrl: (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, ''),
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini'
-    };
-  }
-  return null;
+  const id = providers.resolveProvider();
+  return id ? { provider: id, model: providers.providerInfo(id).model } : null;
 }
 
-function extractBalancedJson(str, start = 0) {
-  if (str[start] !== '{') return null;
-  let depth = 0;
-  let inString = false;
-  let escape = false;
-  for (let i = start; i < str.length; i++) {
-    const c = str[i];
-    if (escape) { escape = false; continue; }
-    if (inString) {
-      if (c === '\\') escape = true;
-      else if (c === '"') inString = false;
-      continue;
-    }
-    if (c === '"') { inString = true; continue; }
-    if (c === '{') depth++;
-    else if (c === '}') {
-      depth--;
-      if (depth === 0) return str.slice(start, i + 1);
-    }
-  }
-  return null;
-}
+const { parseJsonContent } = providers;
 
-function findJsonObjects(text) {
-  const objects = [];
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] === '{') {
-      const chunk = extractBalancedJson(text, i);
-      if (chunk) {
-        objects.push(chunk);
-        i += chunk.length - 1;
-      }
-    }
-  }
-  return objects;
-}
-
-function parseJsonContent(content) {
-  let text = String(content || '').trim();
-  if (!text) throw new Error('AI boş yanıt döndü');
-
-  // MiniMax M3 thinking bloğu JSON'dan önce gelir
-  text = text
-    .replace(/<think>[\s\S]*?<\/redacted_thinking>/gi, '')
-    .replace(/[\s\S]*?<\/think>/gi, '')
-    .trim();
-
-  text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-
-  try {
-    return JSON.parse(text);
-  } catch { /* devam */ }
-
-  const candidates = findJsonObjects(text);
-  for (let i = candidates.length - 1; i >= 0; i--) {
-    try {
-      const parsed = JSON.parse(candidates[i]);
-      if (parsed && typeof parsed === 'object') return parsed;
-    } catch { /* önceki adayı dene */ }
-  }
-
-  throw new Error('AI yanıtı JSON olarak ayrıştırılamadı');
-}
-
-async function callChatAI(messages) {
-  const cfg = getAiConfig();
-  if (!cfg?.apiKey) {
-    throw new Error('AI anahtarı yok. .env dosyasına MINIMAX_API_KEY veya OPENAI_API_KEY ekleyin.');
-  }
-
-  const body = {
-    model: cfg.model,
-    temperature: 0.2,
-    max_tokens: 8192,
-    messages
-  };
-
-  // OpenAI ve MiniMax OpenAI-uyumlu endpoint JSON modunu destekler
-  body.response_format = { type: 'json_object' };
-
-  const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${cfg.apiKey}`
-    },
-    body: JSON.stringify(body)
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    const msg = data.error?.message || data.base_resp?.status_msg || data.message || `AI API hatası (${res.status})`;
-    throw new Error(msg);
-  }
-
-  const content = data.choices?.[0]?.message?.content;
-  return parseJsonContent(content);
+async function callChatAI(messages, provider) {
+  const system = messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n');
+  const user = messages.filter((m) => m.role !== 'system').map((m) => m.content).join('\n\n');
+  const { data } = await providers.chatJSON({ system, user, provider, maxTokens: 8192 });
+  return data;
 }
 
 function guessSuffix(word) {
@@ -219,7 +111,7 @@ async function analyzeWordsWithAI(wordsInput) {
     return {
       words: words.map(ruleBasedFallback),
       provider: 'rules',
-      warning: 'MINIMAX_API_KEY veya OPENAI_API_KEY yok — sadece artikel tahmini yapıldı.'
+      warning: 'AI anahtarı yok (GEMINI/ANTHROPIC/MINIMAX/OPENAI) — sadece artikel tahmini yapıldı.'
     };
   }
 
@@ -264,17 +156,75 @@ JSON formatı:
   return mapAnalyzedWords(result, cfg.provider);
 }
 
+// uk/ar (ve varsa tr/en) çevirisi eksik kelimeleri AI ile toplu doldurur
+function findWordsMissingTranslations(limit) {
+  const rows = db.prepare('SELECT id, word, article, tr, en, translations_json FROM words ORDER BY id').all();
+  const missing = rows.filter((r) => {
+    let t = {};
+    try { t = JSON.parse(r.translations_json || '{}'); } catch { /* */ }
+    return ['tr', 'en', 'uk', 'ar'].some((lang) => !String(t[lang] || '').trim());
+  });
+  return { total: missing.length, batch: limit ? missing.slice(0, limit) : missing };
+}
+
+async function fillMissingTranslations(batchSize = 15) {
+  const cfg = getAiConfig();
+  if (!cfg) throw new Error('Çeviri doldurmak için bir AI anahtarı gerekli (GEMINI_API_KEY, ANTHROPIC_API_KEY veya MINIMAX_API_KEY).');
+
+  const size = Math.min(25, Math.max(1, parseInt(batchSize, 10) || 15));
+  const { total, batch } = findWordsMissingTranslations(size);
+  if (!batch.length) return { updated: 0, remaining: 0, total: 0 };
+
+  const list = batch.map((r) => `${r.id}: ${r.article} ${r.word} (tr: ${r.tr || '?'}, en: ${r.en || '?'})`).join('\n');
+  const result = await callChatAI([
+    {
+      role: 'system',
+      content: 'Sen Almanca-çok dilli sözlük uzmanısın. YALNIZCA geçerli JSON döndür. Her Almanca isim için doğal, kısa sözlük çevirisi ver: tr (Türkçe), en (İngilizce), uk (Ukraynaca, Kiril), ar (Arapça). Artikel ekleme.'
+    },
+    {
+      role: 'user',
+      content: `Kelimeler (id: kelime):
+${list}
+
+JSON formatı:
+{ "items": [ { "id": 1, "tr": "Ev", "en": "House", "uk": "Будинок", "ar": "منزل" } ] }`
+    }
+  ]);
+
+  const byId = new Map(batch.map((r) => [r.id, r]));
+  const upd = db.prepare('UPDATE words SET tr = ?, en = ?, translations_json = ? WHERE id = ?');
+  let updated = 0;
+  db.transaction(() => {
+    (result.items || []).forEach((item) => {
+      const row = byId.get(Number(item.id));
+      if (!row) return;
+      let t = {};
+      try { t = JSON.parse(row.translations_json || '{}'); } catch { /* */ }
+      const pick = (lang) => String(t[lang] || '').trim() || String(item[lang] || '').trim();
+      const next = { ...t, tr: pick('tr'), en: pick('en'), de: t.de || row.word, uk: pick('uk'), ar: pick('ar') };
+      if (JSON.stringify(next) === JSON.stringify(t)) return;
+      upd.run(next.tr || row.tr, next.en || row.en, JSON.stringify(next), row.id);
+      updated++;
+    });
+  })();
+
+  return { updated, remaining: findWordsMissingTranslations(0).total, total };
+}
+
 function getAiStatus() {
   const cfg = getAiConfig();
   return {
     configured: !!cfg,
     provider: cfg?.provider || null,
-    model: cfg?.model || null
+    model: cfg?.model || null,
+    providers: providers.listConfigured().map(providers.providerInfo)
   };
 }
 
 module.exports = {
   analyzeWordsWithAI,
+  fillMissingTranslations,
+  findWordsMissingTranslations,
   parseWordList,
   CATEGORIES,
   getAiStatus,

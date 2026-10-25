@@ -133,14 +133,52 @@ function migrateSchema() {
         tr: r.tr,
         en: r.en,
         de: r.word,
-        uk: r.tr,
-        ar: r.tr
+        uk: '',
+        ar: ''
       }), r.id);
     });
+  }
+
+  // Eski seed uk/ar alanlarına Türkçe metin yazıyordu — bunları boşalt
+  const row = db.prepare("SELECT value FROM meta WHERE key = 'migration_clear_fake_uk_ar'").get();
+  if (!row) {
+    const rows = db.prepare('SELECT id, tr, translations_json FROM words').all();
+    const upd = db.prepare('UPDATE words SET translations_json = ? WHERE id = ?');
+    let cleared = 0;
+    db.transaction(() => {
+      rows.forEach((r) => {
+        let t;
+        try { t = JSON.parse(r.translations_json || '{}'); } catch { return; }
+        let changed = false;
+        ['uk', 'ar'].forEach((lang) => {
+          if (t[lang] && t[lang] === (t.tr || r.tr)) { t[lang] = ''; changed = true; }
+        });
+        if (changed) { upd.run(JSON.stringify(t), r.id); cleared++; }
+      });
+      db.prepare("INSERT INTO meta (key, value) VALUES ('migration_clear_fake_uk_ar', '1')").run();
+    })();
+    if (cleared) console.log(`${cleared} kelimede Türkçe kopyası olan uk/ar çevirisi temizlendi.`);
   }
 }
 
 migrateSchema();
+
+// Silinen kelimelerin ID'leri tekrar kullanılmaz (istemci ilerlemesi ID ile tutulur)
+function syncWordIdSeq() {
+  const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
+  const seq = parseInt(getMeta('word_id_seq', '0'), 10) || 0;
+  if (maxId > seq) setMeta('word_id_seq', maxId);
+}
+
+function nextWordId() {
+  return db.transaction(() => {
+    const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
+    const seq = parseInt(getMeta('word_id_seq', '0'), 10) || 0;
+    const next = Math.max(maxId, seq) + 1;
+    setMeta('word_id_seq', next);
+    return next;
+  })();
+}
 
 function getMeta(key, fallback = null) {
   const row = db.prepare('SELECT value FROM meta WHERE key = ?').get(key);
@@ -161,4 +199,6 @@ function bumpContentVersion() {
   return v;
 }
 
-module.exports = { db, getMeta, setMeta, bumpContentVersion };
+syncWordIdSeq();
+
+module.exports = { db, getMeta, setMeta, bumpContentVersion, nextWordId, syncWordIdSeq };
