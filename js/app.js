@@ -93,21 +93,21 @@ const DAILY_TIPS = {
         { icon: '👶', text: 'Малі створіння "das": das Kind, das Baby, das Lamm' }
     ],
     ar: [
-        { icon: '💡', text: '"das" جميع الكلمات المنتهية بـ -chen و -lein تأخذ. مثال: das Mädchen' },
-        { icon: '🔑', text: '"die" الكلمات المنتهية بـ -ung تأخذ دائمًا تقريبًا. مثال: die Übung' },
-        { icon: '📅', text: '"der" الأيام والأشهر والفصول تأخذ دائمًا! der Montag, der Januar' },
-        { icon: '🧩', text: 'في الكلمات المركبة، تُحدد الأداة بالكلمة الأخيرة' },
-        { icon: '🎨', text: '"das" الألوان كأسماء تأخذ. das Blau, das Rot' },
-        { icon: '🍎', text: '"die" معظم الفواكه تأخذ، لكن التفاحة استثناء: der Apfel!' },
-        { icon: '🏊', text: '"das" الأسماء المشتقة من الأفعال تأخذ: das Essen' },
-        { icon: '🍺', text: '"der" المشروبات الكحولية عادة تأخذ، لكن البيرة استثناء: das Bier!' },
-        { icon: '📖', text: '"die" الكلمات المنتهية بـ -heit و -keit تأخذ دائمًا' },
-        { icon: '⚗️', text: '"das" العناصر الكيميائية والمعادن عادة تأخذ: das Gold' },
-        { icon: '🔢', text: '"die" الأرقام كأسماء تأخذ: die Eins, die Zwei' },
-        { icon: '🧭', text: '"der" الاتجاهات تأخذ دائمًا: der Norden, der Süden' },
-        { icon: '💰', text: '"der" العملات عادة تأخذ: der Euro, der Dollar' },
-        { icon: '✈️', text: '"die" أسماء الطائرات والسفن تأخذ: die Boeing, die Titanic' },
-        { icon: '👶', text: '"das" صغار الكائنات تأخذ: das Kind, das Baby' }
+        { icon: '💡', text: 'جميع الكلمات المنتهية بـ -chen و-lein تأخذ "das"! مثال: das Mädchen' },
+        { icon: '🔑', text: 'الكلمات المنتهية بـ -ung تأخذ "die" دائمًا تقريبًا. مثال: die Übung' },
+        { icon: '📅', text: 'الأيام والأشهر والفصول تأخذ "der" دائمًا! der Montag, der Januar' },
+        { icon: '🧩', text: 'في الكلمات المركبة تحدد الكلمةُ الأخيرة الأداة.' },
+        { icon: '🎨', text: 'الألوان كأسماء تأخذ "das". das Blau, das Rot' },
+        { icon: '🍎', text: 'معظم الفواكه تأخذ "die"، لكن التفاحة استثناء: der Apfel!' },
+        { icon: '🏊', text: 'الأسماء المشتقة من الأفعال تأخذ "das": das Essen' },
+        { icon: '🍺', text: 'المشروبات الكحولية تأخذ عادةً "der"، لكن البيرة استثناء: das Bier!' },
+        { icon: '📖', text: 'الكلمات المنتهية بـ -heit و-keit تأخذ "die" دائمًا' },
+        { icon: '⚗️', text: 'العناصر الكيميائية والمعادن تأخذ عادةً "das": das Gold' },
+        { icon: '🔢', text: 'الأرقام كأسماء تأخذ "die": die Eins, die Zwei' },
+        { icon: '🧭', text: 'الاتجاهات تأخذ "der" دائمًا: der Norden, der Süden' },
+        { icon: '💰', text: 'العملات تأخذ عادةً "der": der Euro, der Dollar' },
+        { icon: '✈️', text: 'أسماء الطائرات والسفن تأخذ "die": die Boeing, die Titanic' },
+        { icon: '👶', text: 'صغار الكائنات تأخذ "das": das Kind, das Baby' }
     ]
 };
 
@@ -231,6 +231,7 @@ const App = {
             this.renderLoginBar();
             this.renderModal();
             // Re-render dynamic sections
+            App.profiles.renderSlots();
             App.tips.showDaily();
             if (App.currentProfile) {
                 const profile = App.profiles.data[App.currentProfile];

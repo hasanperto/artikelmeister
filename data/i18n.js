@@ -28,7 +28,7 @@ const i18n = {
       create_btn: '✨ Oluştur',
       cancel: 'İptal',
       name_placeholder: 'İsmin...',
-      delete_confirm: 'Bu profili silmek istediğinizden emin misiniz?',
+      delete_confirm: 'Bu profili silmek istediğine emin misin?',
 
       // Header
       app_title: 'ArtikelMeister',
@@ -163,7 +163,7 @@ const i18n = {
       profile_words: 'Kelime',
       profile_switch: '👤 Profil Değiştir',
       profile_reset: '🗑️ İlerlemeyi Sıfırla',
-      profile_reset_confirm: 'Tüm ilerlemeniz silinecek. Emin misiniz?',
+      profile_reset_confirm: 'Tüm ilerlemen silinecek. Emin misin?',
       profile_reset_done: 'İlerleme sıfırlandı',
       achievements_title: '🏆 Başarılar',
       achievement_unlocked: '✅ Kazanıldı',
@@ -197,7 +197,7 @@ const i18n = {
       weak_empty: 'Henüz zayıf kelime yok — quiz çözdükçe burada görünecek.',
       weak_practice: '🎯 Bunları çalış',
       speech_auto: '🔊 Cevaptan sonra sesli oku',
-      speech_unavailable: 'Almanca ses bulunamadı. Telefon Ayarlar → Metin okuma (TTS) bölümünden Almanca dil paketini yükleyin.',
+      speech_unavailable: 'Almanca ses bulunamadı. Telefon Ayarlar → Metin okuma (TTS) bölümünden Almanca dil paketini yükle.',
       backup_title: '💾 Yedekleme',
       backup_desc: 'İlerlemeni dosyaya kaydet, telefon değiştirince geri yükle.',
       backup_export: '📤 Dışa aktar',
@@ -405,7 +405,7 @@ const i18n = {
 </div>
 <div class="rule-card" style="border-left:4px solid var(--accent); background:rgba(255,255,255,0.02); padding:12px; margin-bottom:12px; border-radius:0 8px 8px 0;">
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">2. Akkusativ (Direct Object / Whom, What?)</div>
-  <div style="margin-bottom:8px; font-size:14px;">Only "der" changes to "den". Indicates the DIRECTION or the EFFECTED OBJECT.</div>
+  <div style="margin-bottom:8px; font-size:14px;">Only "der" changes to "den". Indicates the DIRECTION or the AFFECTED OBJECT.</div>
   <div class="anim-box"><div class="anim-akk-obj">👁️</div><div class="anim-akk-arrow">➡️</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Ich sehe <u>den</u> Mann. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(I see the man.)</span></div></div>
   <button onclick="App.cases.showExamples('Akkusativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 Show +30 Examples</button>
 </div>
@@ -427,7 +427,7 @@ const i18n = {
       examples_title_suffix: 'Examples',
       results_perfect: 'PERFECT!',
       results_great: 'Great!',
-      results_good: 'Good Going!',
+      results_good: 'Well done!',
       results_try: 'Nice Try!',
       results_practice: 'Keep Practicing!',
       results_correct_answers: 'correct answers',
@@ -678,6 +678,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">1. Nominativ (Subjekt)</div>
   <div style="margin-bottom:8px; font-size:14px;">Das Subjekt des Satzes. Dies ist die Grundform der Artikel, die wir lernen.</div>
   <div class="anim-box"><div class="anim-nom">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--text-primary)"><u>Der</u> Mann schläft.</div></div>
+  <button onclick="App.cases.showExamples('Nominativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 +30 Beispiele anzeigen</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Mehr Beispiele</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-nom">👶</div><div style="margin-left:15px; font-weight:bold; color:var(--text-primary)"><u>Das</u> Kind spielt.</div></div>
@@ -688,6 +689,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">2. Akkusativ (Direktes Objekt / Wen, Was?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Nur "der" ändert sich zu "den". Zeigt die RICHTUNG oder das BETROFFENE OBJEKT an. Bewegung in Richtung eines Ortes (Wohin?).</div>
   <div class="anim-box"><div class="anim-akk-obj">👁️</div><div class="anim-akk-arrow">➡️</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Ich sehe <u>den</u> Mann.</div></div>
+  <button onclick="App.cases.showExamples('Akkusativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 +30 Beispiele anzeigen</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Mehr Beispiele</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-drive-car">🚗</div><div class="anim-akk-arrow">➡️</div><div class="anim-static-park">🏞️</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Wir fahren in <u>den</u> Park. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(*Richtung)</span></div></div>
@@ -698,6 +700,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">3. Dativ (Indirektes Objekt / Wem, Wo?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Alle Artikel ändern sich! "der"->dem, "die"->der, "das"->dem. Zeigt an, AN einem Ort zu sein oder EMPFÄNGER zu sein.</div>
   <div class="anim-box"><div class="anim-akk-obj">👩</div><div class="anim-dat-gift">🎁</div><div class="anim-akk-obj" style="margin-left:60px;">🧍</div><div style="margin-left:15px; font-weight:bold; color:#F59E0B">Ich helfe <u>dem</u> Freund.</div></div>
+  <button onclick="App.cases.showExamples('Dativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 +30 Beispiele anzeigen</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Mehr Beispiele</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-static-park">🏞️</div><div class="anim-nom" style="margin-left:-18px; font-size:20px;">🧍</div><div style="margin-left:25px; font-weight:bold; color:#F59E0B">Wir sind in <u>dem</u> Park. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(*Position)</span></div></div>
@@ -708,6 +711,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">4. Genitiv (Besitz / Wessen?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Zeigt Besitz oder Zugehörigkeit an. "der/das" -> "des" (Nomen bekommt "-s"). "die/Plural" -> "der".</div>
   <div class="anim-box"><div class="anim-akk-obj">🚗</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:#10B981">Das Auto <u>des</u> Mannes.</div></div>
+  <button onclick="App.cases.showExamples('Genitiv')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 +30 Beispiele anzeigen</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Mehr Beispiele</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-akk-obj">🐕</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">👩</div><div style="margin-left:15px; font-weight:bold; color:#10B981">Der Hund <u>der</u> Frau.</div></div>
@@ -882,14 +886,14 @@ const i18n = {
     // ─────────── УКРАЇНСЬКА ───────────
     uk: {
       login_title: 'ArtikelMeister',
-      login_subtitle: 'Оберіть профіль або створіть новий',
+      login_subtitle: 'Обери профіль або створи новий',
       new_profile: 'Новий профіль',
-      new_profile_desc: 'Почніть нову пригоду',
+      new_profile_desc: 'Почни нову пригоду',
       create_profile: 'Створити профіль',
       create_btn: '✨ Створити',
       cancel: 'Скасувати',
-      name_placeholder: 'Ваше ім\'я...',
-      delete_confirm: 'Ви впевнені, що хочете видалити цей профіль?',
+      name_placeholder: 'Твоє ім’я...',
+      delete_confirm: 'Точно видалити цей профіль?',
 
       app_title: 'ArtikelMeister',
 
@@ -906,16 +910,16 @@ const i18n = {
       modes_title: 'Режими',
 
       mode_learn: 'Вчити',
-      mode_learn_desc: 'Відкрийте правила артиклів та поради',
+      mode_learn_desc: 'Відкривай правила артиклів і поради',
       mode_quiz: 'Вікторина',
       mode_quiz_desc: '10 запитань + комбо-бонуси',
       mode_speed: 'Швидкий раунд',
       mode_speed_desc: 'Скільки правильних за 60 секунд?',
       mode_rules: 'Правила',
       mode_rules_desc: 'Правила суфіксів, винятки та поради',
-      mode_learn_tip: 'Почніть з вивчення правил!',
+      mode_learn_tip: 'Почни з вивчення правил!',
       mode_cases: 'Відмінки',
-      mode_cases_desc: 'Akkusativ, Dativ & Genitiv',
+      mode_cases_desc: 'Відмінювання: Akkusativ, Dativ і Genitiv',
 
       nav_home: 'Головна',
       nav_learn: 'Вчити',
@@ -935,10 +939,10 @@ const i18n = {
 
       speed_score: 'Рахунок',
       speed_start: '⚡ Почати швидкий раунд',
-      speed_ready: 'Готові?',
+      speed_ready: 'Почнемо?',
 
       learn_title: 'Картки навчання',
-      learn_subtitle: 'Вивчайте правила та поради',
+      learn_subtitle: 'Вивчай правила та поради',
       learn_tab_tips: '💡 Поради',
       learn_suffix_rules: '📝 Правила суфіксів',
       learn_category_tips: '📂 Поради за категоріями',
@@ -957,19 +961,20 @@ const i18n = {
       rules_category_title: '📂 Правила категорій',
 
       cases_title: 'Відмінки',
-      cases_subtitle: 'Akkusativ, Dativ & Genitiv',
+      cases_subtitle: 'Відмінювання: Akkusativ, Dativ і Genitiv',
       cases_next: 'Наступний приклад ➔',
       cases_hint: 'Підказка',
       cases_intro_title: 'Пригода відмінювання',
-      cases_intro_desc: 'У німецькій мові артиклі змінюються залежно від їх ролі в реченні. Тут ви граючи дізнаєтесь, чому вони змінюються та як їх вгадати!<br><br><b>Як грати?</b><br>• Виберіть правильний артикль для пропуску.<br>• Натисніть 💡, якщо потрібна підказка.<br>• Отримуйте XP за правильні відповіді!',
+      cases_intro_desc: 'У німецькій мові артиклі змінюються залежно від їхньої ролі в реченні. Тут ти в ігровій формі дізнаєшся, чому вони змінюються і як їх угадати!<br><br><b>Як грати?</b><br>• Обери правильний артикль для пропуску.<br>• Натисни 💡, якщо потрібна підказка.<br>• Отримуй XP за правильні відповіді!',
       cases_start_btn: 'Почати практику 🎮',
       cases_guide_btn: '📖 Читати посібник',
-      cases_guide_table: 'Таблиця відмінювання',
+      cases_guide_table: 'Таблиця відмінювання артиклів',
       cases_guide_content: `
 <div class="rule-card" style="border-left:4px solid var(--text-primary); background:rgba(255,255,255,0.02); padding:12px; margin-bottom:12px; border-radius:0 8px 8px 0;">
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">1. Nominativ (Називний відмінок)</div>
   <div style="margin-bottom:8px; font-size:14px;">Це підмет у реченні. Початкова форма артиклів.</div>
   <div class="anim-box"><div class="anim-nom">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--text-primary)"><u>Der</u> Mann schläft. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Чоловік спить.)</span></div></div>
+  <button onclick="App.cases.showExamples('Nominativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 Показати +30 прикладів</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Більше прикладів</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-nom">👶</div><div style="margin-left:15px; font-weight:bold; color:var(--text-primary)"><u>Das</u> Kind spielt. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Дитина грається.)</span></div></div>
@@ -980,6 +985,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">2. Akkusativ (Знахідний / Кого, Що?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Тільки "der" змінюється на "den". Вказує НАПРЯМОК або ОБ'ЄКТ дії. Рух до місця.</div>
   <div class="anim-box"><div class="anim-akk-obj">👁️</div><div class="anim-akk-arrow">➡️</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Ich sehe <u>den</u> Mann. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Я бачу чоловіка.)</span></div></div>
+  <button onclick="App.cases.showExamples('Akkusativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 Показати +30 прикладів</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Більше прикладів</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-drive-car">🚗</div><div class="anim-akk-arrow">➡️</div><div class="anim-static-park">🏞️</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Wir fahren in <u>den</u> Park. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Їдемо в парк.)</span></div></div>
@@ -990,6 +996,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">3. Dativ (Давальний / Кому, Де?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Усі артиклі змінюються! "der"->dem, "die"->der, "das"->dem. Вказує на ПЕРЕБУВАННЯ або ОТРИМУВАЧА.</div>
   <div class="anim-box"><div class="anim-akk-obj">👩</div><div class="anim-dat-gift">🎁</div><div class="anim-akk-obj" style="margin-left:60px;">🧍</div><div style="margin-left:15px; font-weight:bold; color:#F59E0B">Ich helfe <u>dem</u> Freund. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Допомагаю другу.)</span></div></div>
+  <button onclick="App.cases.showExamples('Dativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 Показати +30 прикладів</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Більше прикладів</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-static-park">🏞️</div><div class="anim-nom" style="margin-left:-18px; font-size:20px;">🧍</div><div style="margin-left:25px; font-weight:bold; color:#F59E0B">Wir sind in <u>dem</u> Park. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Ми в парку.)</span></div></div>
@@ -1000,6 +1007,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">4. Genitiv (Родовий / Чий?)</div>
   <div style="margin-bottom:8px; font-size:14px;">Вказує на приналежність. "der/das" -> "des" (+s). "die/Plural" -> "der".</div>
   <div class="anim-box"><div class="anim-akk-obj">🚗</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:#10B981">Das Auto <u>des</u> Mannes. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Машина чоловіка.)</span></div></div>
+  <button onclick="App.cases.showExamples('Genitiv')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 Показати +30 прикладів</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Більше прикладів</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-akk-obj">🐕</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">👩</div><div style="margin-left:15px; font-weight:bold; color:#10B981">Der Hund <u>der</u> Frau. <span style="opacity:0.8; font-weight:normal; margin-left:5px;">(Собака жінки.)</span></div></div>
@@ -1008,12 +1016,12 @@ const i18n = {
 
       results_continue: 'Продовжити',
       results_retry: '🔄 Спробувати знову',
-      examples_title_suffix: 'Прикладів',
+      examples_title_suffix: '— приклади',
       results_perfect: 'ІДЕАЛЬНО!',
       results_great: 'Чудово!',
-      results_good: 'Гарно йде!',
+      results_good: 'Чудова робота!',
       results_try: 'Непогано!',
-      results_practice: 'Тренуйтеся далі!',
+      results_practice: 'Тренуйся далі!',
       results_correct_answers: 'правильних відповідей',
       results_in_60s: 'за 60 секунд',
       results_speed_done: 'Швидкий раунд завершено!',
@@ -1027,7 +1035,7 @@ const i18n = {
       profile_words: 'Слова',
       profile_switch: '👤 Змінити профіль',
       profile_reset: '🗑️ Скинути прогрес',
-      profile_reset_confirm: 'Весь ваш прогрес буде видалено. Ви впевнені?',
+      profile_reset_confirm: 'Увесь твій прогрес буде видалено. Продовжити?',
       profile_reset_done: 'Прогрес скинуто',
       achievements_title: '🏆 Досягнення',
       achievement_unlocked: '✅ Отримано',
@@ -1058,9 +1066,9 @@ const i18n = {
       weak_empty: 'Слабких слів поки немає — вони з’являться тут під час вікторин.',
       weak_practice: '🎯 Повторити їх',
       speech_auto: '🔊 Озвучувати після відповіді',
-      speech_unavailable: 'Німецький голос не знайдено. Встановіть німецький мовний пакет у Налаштування → Синтез мовлення.',
+      speech_unavailable: 'Німецький голос не знайдено. Встанови німецький мовний пакет у Налаштування → Синтез мовлення.',
       backup_title: '💾 Резервна копія',
-      backup_desc: 'Збережіть прогрес у файл і відновіть його на новому телефоні.',
+      backup_desc: 'Збережи прогрес у файл і віднови його на новому телефоні.',
       backup_export: '📤 Експорт',
       backup_import: '📥 Імпорт',
       backup_done: '✅ Резервну копію створено',
@@ -1180,13 +1188,13 @@ const i18n = {
       create_profile: 'إنشاء ملف',
       create_btn: '✨ إنشاء',
       cancel: 'إلغاء',
-      name_placeholder: '...اسمك',
+      name_placeholder: 'اسمك...',
       delete_confirm: 'هل أنت متأكد أنك تريد حذف هذا الملف؟',
 
       app_title: 'ArtikelMeister',
 
       greeting_morning: 'صباح الخير',
-      greeting_afternoon: 'مساء الخير',
+      greeting_afternoon: 'نهارك سعيد',
       greeting_evening: 'مساء الخير',
       greeting_night: 'تصبح على خير',
 
@@ -1207,7 +1215,7 @@ const i18n = {
       mode_rules_desc: 'قواعد اللواحق والاستثناءات والنصائح',
       mode_learn_tip: 'ابدأ بتعلم القواعد!',
       mode_cases: 'الحالات الإعرابية',
-      mode_cases_desc: 'Akkusativ, Dativ & Genitiv',
+      mode_cases_desc: 'تصريف Akkusativ وDativ وGenitiv',
 
       nav_home: 'الرئيسية',
       nav_learn: 'تعلّم',
@@ -1220,7 +1228,7 @@ const i18n = {
       quiz_wrong: 'خطأ',
       quiz_streak: 'سلسلة',
       quiz_hint_btn: '💡 إظهار تلميح',
-      quiz_exit: 'خروج ←',
+      quiz_exit: '→ خروج',
       quiz_hint_exception: '⚠️ استثناء:',
       quiz_hint_suffix: '💡 اللاحقة:',
       quiz_hint_usually: '→ عادة',
@@ -1249,7 +1257,7 @@ const i18n = {
       rules_category_title: '📂 قواعد الفئات',
 
       cases_title: 'الحالات الإعرابية',
-      cases_subtitle: 'Akkusativ, Dativ & Genitiv',
+      cases_subtitle: 'تصريف Akkusativ وDativ وGenitiv',
       cases_next: 'المثال التالي ➔',
       cases_hint: 'تلميح',
       cases_intro_title: 'مغامرة الإعراب',
@@ -1262,6 +1270,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">1. Nominativ (حالة الرفع)</div>
   <div style="margin-bottom:8px; font-size:14px;">إنه الفاعل في الجملة. الشكل الأساسي للأدوات.</div>
   <div class="anim-box"><div class="anim-nom">🧍</div><div style="margin-right:15px; font-weight:bold; color:var(--text-primary)"><u>Der</u> Mann schläft. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(الرجل ينام)</span></div></div>
+  <button onclick="App.cases.showExamples('Nominativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 عرض أكثر من 30 مثالًا</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ المزيد من الأمثلة</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-nom">👶</div><div style="margin-right:15px; font-weight:bold; color:var(--text-primary)"><u>Das</u> Kind spielt. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(الطفل يلعب)</span></div></div>
@@ -1272,6 +1281,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">2. Akkusativ (حالة النصب / مفعول به مباشر)</div>
   <div style="margin-bottom:8px; font-size:14px;">"der" فقط يتغير إلى "den". يشير للاتجاه أو المفعول به! دخول / اتجاه إلى مكان.</div>
   <div class="anim-box"><div class="anim-akk-obj">👁️</div><div class="anim-akk-arrow" style="transform:scaleX(-1)">⬅️</div><div class="anim-akk-obj">🧍</div><div style="margin-right:15px; font-weight:bold; color:var(--accent)">Ich sehe <u>den</u> Mann. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(أنا أرى الرجل)</span></div></div>
+  <button onclick="App.cases.showExamples('Akkusativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 عرض أكثر من 30 مثالًا</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ المزيد من الأمثلة</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-drive-car" style="animation-name:driveCarAr">🚗</div><div class="anim-akk-arrow" style="transform:scaleX(-1)">⬅️</div><div class="anim-static-park">🏞️</div><div style="margin-right:15px; font-weight:bold; color:var(--accent)">Wir fahren in <u>den</u> Park. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(نذهب للحديقة)</span></div></div>
@@ -1282,6 +1292,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">3. Dativ (حالة الجر / مفعول به غير مباشر)</div>
   <div style="margin-bottom:8px; font-size:14px;">تتغير كل الأدوات! "der"->dem, "die"->der, "das"->dem. تشير للوجود في مكان أو استلام شيء.</div>
   <div class="anim-box"><div class="anim-akk-obj" style="margin-right:60px;">👩</div><div class="anim-dat-gift" style="right:50px; left:auto; animation-name: giveDatAr">🎁</div><div class="anim-akk-obj">🧍</div><div style="margin-right:15px; font-weight:bold; color:#F59E0B">Ich helfe <u>dem</u> Freund. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(أنا أساعد الصديق)</span></div></div>
+  <button onclick="App.cases.showExamples('Dativ')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 عرض أكثر من 30 مثالًا</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ المزيد من الأمثلة</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-static-park">🏞️</div><div class="anim-nom" style="margin-right:-18px; font-size:20px;">🧍</div><div style="margin-right:25px; font-weight:bold; color:#F59E0B">Wir sind in <u>dem</u> Park. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(نحن في الحديقة)</span></div></div>
@@ -1292,6 +1303,7 @@ const i18n = {
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">4. Genitiv (حالة الإضافة / لمن؟)</div>
   <div style="margin-bottom:8px; font-size:14px;">تُظهر الملكية. "der/das" -> "des" (+s). "die/الجمع" -> "der". حروف الجر: <b>wegen, während, trotz</b>.</div>
   <div class="anim-box"><div class="anim-akk-obj">🚗</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">🧍</div><div style="margin-right:15px; font-weight:bold; color:#10B981">Das Auto <u>des</u> Mannes. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(سيارة الرجل)</span></div></div>
+  <button onclick="App.cases.showExamples('Genitiv')" class="btn" style="margin-top:10px; padding:8px 16px; font-size:14px; width:100%; border:1px solid var(--accent); background:rgba(var(--accent-rgb), 0.1); color:white; font-weight:bold; border-radius:8px;">📁 عرض أكثر من 30 مثالًا</button>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ المزيد من الأمثلة</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
     <div class="anim-box" style="height:40px;"><div class="anim-akk-obj">🐕</div><div class="anim-gen-link">🔗</div><div class="anim-akk-obj">👩</div><div style="margin-right:15px; font-weight:bold; color:#10B981">Der Hund <u>der</u> Frau. <span style="opacity:0.8; font-weight:normal; margin-right:5px;">(كلب المرأة)</span></div></div>
@@ -1300,12 +1312,12 @@ const i18n = {
 
       results_continue: 'متابعة',
       results_retry: '🔄 حاول مرة أخرى',
-      examples_title_suffix: 'أمثلة',
-      results_perfect: '!ممتاز',
-      results_great: '!رائع',
-      results_good: '!جيد',
-      results_try: '!محاولة جيدة',
-      results_practice: '!تدرب أكثر',
+      examples_title_suffix: '— أمثلة',
+      results_perfect: 'ممتاز!',
+      results_great: 'رائع!',
+      results_good: 'أحسنت!',
+      results_try: 'محاولة جيدة!',
+      results_practice: 'واصل التدريب!',
       results_correct_answers: 'إجابات صحيحة',
       results_in_60s: 'في 60 ثانية',
       results_speed_done: 'انتهت جولة السرعة!',
@@ -1328,12 +1340,12 @@ const i18n = {
       combo_label: 'كومبو',
       combo_bonus_x2: '!x2 XP',
       combo_bonus_x3: '!x3 XP',
-      combo_fire: '🔥 !مكافأة كومبو',
+      combo_fire: '🔥 مكافأة كومبو!',
 
       lang_title: 'اللغة',
       lang_select: '🌍 اللغة',
 
-      back: 'رجوع ←',
+      back: '→ رجوع',
       level: 'المستوى',
       exception: 'استثناء',
       tip_new: '💡 تم تحميل نصيحة جديدة!',
@@ -1374,7 +1386,7 @@ const i18n = {
       ai_sentence_title: '✍️ أستاذ الجمل',
       ai_sentence_desc: 'جمل من الذكاء الاصطناعي بكلماتك الضعيفة — تدريب على حالات الإعراب',
       ai_needs_online: '🌐 يتطلب الإنترنت وخادم الذكاء الاصطناعي',
-      ai_menu_back: '← المدرّب',
+      ai_menu_back: '→ المدرّب',
       ai_tip_title: '💡 نصيحة مهمة',
       ai_tip_ai: '🤖 شرح {provider}',
       ai_loading: 'الذكاء الاصطناعي يفكر…',
@@ -1449,7 +1461,7 @@ const i18n = {
       ai_key_default: '⭐ افتراضي',
       ai_key_make_default: '⭐ اجعله افتراضيًا',
       ai_key_default_set: '⭐ {provider} هو الآن الذكاء الاصطناعي الافتراضي',
-      achievement_earned: '🏆 :إنجاز',
+      achievement_earned: '🏆 إنجاز:',
       level_up: '⬆️ المستوى',
       settings: 'الإعدادات',
       page_title: 'ArtikelMeister — تعلّم أدوات التعريف الألمانية',

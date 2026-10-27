@@ -524,8 +524,8 @@ var DB = {
       { icon: "🏔️", text: "Der Berg ist hoch.", tr: "Dağ yüksektir." },
       { icon: "🏫", text: "Die Schule ist nah.", tr: "Okul yakındır." },
       { icon: "💼", text: "Die Tasche ist schwer.", tr: "Çanta ağırdır." },
-      { icon: "🔑", text: "Der Schlüssel passt.", tr: "Anahtar oluyor." },
-      { icon: "🍵", text: "Der Tee schmeckt.", tr: "Çay güzel (tadında)." },
+      { icon: "🔑", text: "Der Schlüssel passt.", tr: "Anahtar uyuyor." },
+      { icon: "🍵", text: "Der Tee schmeckt.", tr: "Çay lezzetli." },
       { icon: "☕", text: "Der Kaffee ist bitter.", tr: "Kahve acıdır." },
       { icon: "⚽", text: "Der Ball ist rund.", tr: "Top yuvarlaktır." },
       { icon: "🚲", text: "Das Fahrrad ist kaputt.", tr: "Bisiklet bozuktur." },
@@ -581,11 +581,11 @@ var DB = {
       { icon: "💻 ➡️ 🖱️", text: "Sie nutzt den Laptop.", tr: "Laptop'u kullanıyor." },
       { icon: "🚌 ➡️ 🚉", text: "Wir nehmen den Bus.", tr: "Otobüse biniyoruz." },
       { icon: "🔑 ➡️ 🔓", text: "Er verliert den Schlüssel.", tr: "Anahtarı kaybediyor." },
-      { icon: "🧣 ➡️ 🧣", text: "Sie kauft die Schal.", tr: "Atkıyı satın alıyor." },
+      { icon: "🧣 ➡️ 🧣", text: "Sie kauft den Schal.", tr: "Atkıyı satın alıyor." },
       { icon: "🖼️ ➡️ 🖼️", text: "Ich sehe das Bild.", tr: "Resmi görüyorum." },
       { icon: "📧 ➡️ 📧", text: "Wir schicken die E-Mail.", tr: "E-postayı gönderiyoruz." },
       { icon: "🎮 ➡️ 🕹️", text: "Er spielt das Spiel.", tr: "Oyun oynuyor." },
-      { icon: "☕ ➡️ ☕", text: "Sie kocht den Kaffee.", tr: "Kahveyi pişiriyor." }
+      { icon: "☕ ➡️ ☕", text: "Sie kocht den Kaffee.", tr: "Kahve yapıyor." }
     ],
     Dativ: [
       { icon: "👩 🤝 ♿", text: "Ich helfe dem Freund.", tr: "Arkadaşa yardım ediyorum. (Yardım eylemi)" },
@@ -613,7 +613,7 @@ var DB = {
       { icon: "👨‍👩‍👧‍👦 \n 🏠", text: "Wir wohnen bei der Tante.", tr: "Teyzede (yanında) kalıyoruz." },
       { icon: "🥣 📥 🥛", text: "Milch ist in dem Müsli.", tr: "Süt müsli içindedir." },
       { icon: "🔐 📥 🔑", text: "Der Schlüssel steckt in dem Schloss.", tr: "Anahtar kilidin içindedir." },
-      { icon: "🕸️ 📥 🦜", text: "Der Vogel ist in dem Käfig.", tr: "Kuş kafestir." },
+      { icon: "🕸️ 📥 🦜", text: "Der Vogel ist in dem Käfig.", tr: "Kuş kafesin içinde." },
       { icon: "🧥 🔴", text: "Die Knöpfe sind an dem Mantel.", tr: "Düğmeler paltonun üzerindedir." },
       { icon: "🧑 🎧", text: "Ich höre dem Sänger zu.", tr: "Şarkıcıyı dinliyorum." },
       { icon: "🚗 ◀️ 🚲", text: "Das Auto weicht dem Rad aus.", tr: "Araba bisikletten kaçıyor." },
