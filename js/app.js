@@ -18,7 +18,7 @@ const AVATARS = ['🧑‍🎓', '👨‍💻', '👩‍🏫', '🦊', '🐻', '�
 const MOTIVATIONS = {
     tr: ['Bugün harika bir gün Almanca öğrenmek için! 🌟', 'Her doğru cevap seni bir adım ileriye taşır! 🚀', 'Artikel ustası olma yolunda ilerliyorsun! 💪', 'Pratik mükemmelleştirir! 🎯', 'Kombo serisi kır, bonus XP kazan! 🔥', 'Küçük adımlar, büyük sonuçlar! ⭐', 'Almanca artikeller artık kolay! 🇩🇪'],
     en: ['Today is a great day to learn German! 🌟', 'Every correct answer takes you one step further! 🚀', 'You\'re on your way to becoming an Article master! 💪', 'Practice makes perfect! 🎯', 'Break combo streaks, earn bonus XP! 🔥', 'Small steps, big results! ⭐', 'German articles made easy! 🇩🇪'],
-    de: ['Heute ist ein großartiger Tag zum Lernen! 🌟', 'Jede richtige Antwort bringt dich weiter! 🚀', 'Du bist auf dem Weg zum Artikel-Meister! 💪', 'Übung macht den Meister! 🎯', 'Baue Combos, verdiene Bonus-XP! 🔥', 'Kleine Schritte, große Ergebnisse! ⭐', 'Deutsche Artikel leicht gemacht! 🇩🇪'],
+    de: ['Heute ist ein großartiger Tag zum Lernen! 🌟', 'Jede richtige Antwort bringt dich weiter! 🚀', 'Du bist auf dem Weg zum Artikel-Meister! 💪', 'Übung macht den Meister! 🎯', 'Baue Kombos auf, verdiene Bonus-XP! 🔥', 'Kleine Schritte, große Ergebnisse! ⭐', 'Deutsche Artikel leicht gemacht! 🇩🇪'],
     uk: ['Сьогодні чудовий день для вивчення німецької! 🌟', 'Кожна правильна відповідь — крок вперед! 🚀', 'Ти на шляху до майстра артиклів! 💪', 'Практика робить досконалим! 🎯', 'Збирай комбо, заробляй бонусний XP! 🔥', 'Маленькі кроки — великі результати! ⭐', 'Німецькі артиклі — це легко! 🇩🇪'],
     ar: ['اليوم يوم رائع لتعلم الألمانية! 🌟', 'كل إجابة صحيحة تقربك خطوة! 🚀', 'أنت في طريقك لإتقان الأدوات! 💪', 'التمرين يصنع الكمال! 🎯', 'اجمع الكومبو واكسب XP إضافي! 🔥', 'خطوات صغيرة، نتائج كبيرة! ⭐', 'الأدوات الألمانية أصبحت سهلة! 🇩🇪']
 };
@@ -121,6 +121,7 @@ const App = {
         // Load saved language first
         i18n.loadSaved();
         i18n.applyTranslations();
+        ContentI18n.apply(window.DB, i18n.currentLang);
         this.lang.updateFlag();
         this.lang.renderLoginBar();
         this.lang.renderModal();
@@ -225,6 +226,7 @@ const App = {
 
         set(code) {
             i18n.setLang(code);
+            ContentI18n.apply(window.DB, code);
             this.updateFlag();
             this.renderLoginBar();
             this.renderModal();
@@ -235,6 +237,7 @@ const App = {
                 document.getElementById('welcome-greeting').textContent = App.getGreeting() + ',';
                 document.getElementById('welcome-motivate').textContent = App.getMotivation();
             }
+            if (App.progress) App.updateUI();
             if (App.currentSection === 'learn') App.learn.render();
             if (App.currentSection === 'rules') App.rules.render();
             if (App.currentSection === 'profile') { App.profile.renderAchievements(); window.AICoach?.renderKeys(); }
@@ -396,6 +399,7 @@ const App = {
 
     // Sunucudan yeni içerik geldiğinde (api-loader) ekranı tazele; oyun ortasındaki sorular değişmez
     onContentUpdated() {
+        ContentI18n.apply(window.DB, i18n.currentLang);
         if (!this.progress) return;
         this.updateUI();
         if (this.currentSection === 'learn') this.learn.render();
@@ -533,7 +537,7 @@ const App = {
         document.getElementById('level-bar-fill').style.width = pct + '%';
 
         document.getElementById('profile-level-num').textContent = p.level;
-        document.getElementById('profile-level-title').textContent = `${lv.title} (${lv.titleTr})`;
+        document.getElementById('profile-level-title').textContent = lv.titleTr && lv.titleTr !== lv.title ? `${lv.title} (${lv.titleTr})` : lv.title;
         document.getElementById('profile-level-xp').textContent = `${p.xp} / ${nlv.xpRequired} XP`;
         document.getElementById('profile-level-bar').style.width = pct + '%';
         document.getElementById('profile-header-level').textContent = `${i18n.t('level')} ${p.level} — ${lv.title}`;
@@ -986,7 +990,7 @@ const App = {
 
             document.getElementById('quiz-translation').textContent =
                 lang === 'de' ? primary : `${primary} · ${secondary}`;
-            document.getElementById('quiz-category').innerHTML = `📁 ${esc(q.category)}`;
+            document.getElementById('quiz-category').innerHTML = `📁 ${esc(ContentI18n.wordCategory(q.category, lang))}`;
             document.getElementById('quiz-correct').textContent = this.correct;
             document.getElementById('quiz-wrong').textContent = this.wrong;
             document.getElementById('quiz-streak-val').textContent = this.streak;
@@ -1322,7 +1326,7 @@ const App = {
                     <div style="font-size:24px; min-width:60px; text-align:center; white-space:pre-line; line-height:1.1;">${esc(ex.icon)}</div>
                     <div>
                         <div style="font-weight:bold; color:var(--text-primary); font-size:16px;">${esc(ex.text)}</div>
-                        <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${esc(ex.tr)}</div>
+                        ${ex.tr ? `<div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${esc(ex.tr)}</div>` : ''}
                     </div>
                 `;
                 listEl.appendChild(card);
@@ -1387,9 +1391,9 @@ const App = {
                 <span class="case-noun">${ex.declinedNoun ? esc(ex.declinedNoun) : wordHtml}</span>
                 <span>${esc(ex.sentencePost || '')}</span>
               </div>
-              <div style="font-size:13px; color:var(--text-muted); margin-top:8px;">
+              ${ex.tr ? `<div style="font-size:13px; color:var(--text-muted); margin-top:8px;">
                 (${esc(ex.tr)})
-              </div>
+              </div>` : ''}
               <div class="case-explanation" id="case-explanation-el">
                 ${esc(ex.explanation)}
               </div>

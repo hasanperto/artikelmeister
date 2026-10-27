@@ -99,7 +99,7 @@ async function main() {
 
   fs.rmSync(WWW, { recursive: true, force: true });
   fs.mkdirSync(WWW, { recursive: true });
-  ['index.html', 'js', 'css', 'fonts', 'data/i18n.js', 'data/database.js'].forEach(copy);
+  ['index.html', 'js', 'css', 'fonts', 'data/i18n.js', 'data/content-i18n.js', 'data/database.js'].forEach(copy);
 
   fs.writeFileSync(
     path.join(WWW, 'js', 'config.js'),

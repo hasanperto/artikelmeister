@@ -298,7 +298,16 @@ const i18n = {
       ai_key_default_set: '⭐ {provider} artık varsayılan AI',
       achievement_earned: '🏆 Başarı:',
       level_up: '⬆️ Seviye',
-      settings: 'Ayarlar'
+      settings: 'Ayarlar',
+      page_title: 'ArtikelMeister — Almanca Artikel Öğren',
+      cases_table_case: 'Fall (Hal)',
+      cases_table_masc: 'Mas. (der)',
+      cases_table_fem: 'Fem. (die)',
+      cases_table_neut: 'Neu. (das)',
+      cases_table_nom: 'Nominativ (Yalın)',
+      cases_table_akk: 'Akkusativ (-i)',
+      cases_table_dat: 'Dativ (-e)',
+      cases_table_gen: 'Genitiv (İyelik)'
     },
 
     // ─────────── ENGLISH ───────────
@@ -566,7 +575,16 @@ const i18n = {
       ai_key_default_set: '⭐ {provider} is now the default AI',
       achievement_earned: '🏆 Achievement:',
       level_up: '⬆️ Level',
-      settings: 'Settings'
+      settings: 'Settings',
+      page_title: 'ArtikelMeister — Learn German Articles',
+      cases_table_case: 'Case',
+      cases_table_masc: 'Masc. (der)',
+      cases_table_fem: 'Fem. (die)',
+      cases_table_neut: 'Neut. (das)',
+      cases_table_nom: 'Nominativ (subject)',
+      cases_table_akk: 'Akkusativ (direct object)',
+      cases_table_dat: 'Dativ (indirect object)',
+      cases_table_gen: 'Genitiv (possession)'
     },
 
     // ─────────── DEUTSCH ───────────
@@ -598,7 +616,7 @@ const i18n = {
       mode_learn: 'Lernen',
       mode_learn_desc: 'Artikelregeln und Tipps entdecken',
       mode_quiz: 'Quiz',
-      mode_quiz_desc: '10-Fragen-Übung + Combo-Boni',
+      mode_quiz_desc: '10-Fragen-Übung + Kombo-Boni',
       mode_speed: 'Geschwindigkeitsrunde',
       mode_speed_desc: 'Wie viele schaffst du in 60 Sekunden?',
       mode_rules: 'Regeln',
@@ -610,7 +628,7 @@ const i18n = {
       nav_home: 'Startseite',
       nav_learn: 'Lernen',
       nav_quiz: 'Quiz',
-      nav_speed: 'Speed',
+      nav_speed: 'Tempo',
       nav_profile: 'Profil',
 
       quiz_question: 'WELCHER ARTIKEL?',
@@ -652,9 +670,9 @@ const i18n = {
       cases_hint: 'Tipp',
       cases_intro_title: 'Abenteuer der Deklination',
       cases_intro_desc: 'Im Deutschen ändern sich Artikel je nach Funktion im Satz. Hier lernst du spielerisch, warum sie sich ändern und wie man sie errät!<br><br><b>Wie wird gespielt?</b><br>• Wähle den richtigen Artikel für die Lücke.<br>• Klicke auf 💡, wenn du einen Tipp brauchst.<br>• Sammle XP und Kombos!',
-      cases_start_btn: 'Übung Starten 🎮',
-      cases_guide_btn: '📖 Leitfaden Lesen',
-      cases_guide_table: 'Artikel Deklinationstabelle',
+      cases_start_btn: 'Übung starten 🎮',
+      cases_guide_btn: '📖 Leitfaden lesen',
+      cases_guide_table: 'Deklinationstabelle der Artikel',
       cases_guide_content: `
 <div class="rule-card" style="border-left:4px solid var(--text-primary); background:rgba(255,255,255,0.02); padding:12px; margin-bottom:12px; border-radius:0 8px 8px 0;">
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">1. Nominativ (Subjekt)</div>
@@ -668,7 +686,7 @@ const i18n = {
 </div>
 <div class="rule-card" style="border-left:4px solid var(--accent); background:rgba(255,255,255,0.02); padding:12px; margin-bottom:12px; border-radius:0 8px 8px 0;">
   <div style="font-weight:bold; font-size:16px; margin-bottom:8px;">2. Akkusativ (Direktes Objekt / Wen, Was?)</div>
-  <div style="margin-bottom:8px; font-size:14px;">Nur "der" ändert sich zu "den". Zeigt die RICHTUNG oder das BETROFFENE OBJEKT an. Betreten / Bewegen zu einem Ort.</div>
+  <div style="margin-bottom:8px; font-size:14px;">Nur "der" ändert sich zu "den". Zeigt die RICHTUNG oder das BETROFFENE OBJEKT an. Bewegung in Richtung eines Ortes (Wohin?).</div>
   <div class="anim-box"><div class="anim-akk-obj">👁️</div><div class="anim-akk-arrow">➡️</div><div class="anim-akk-obj">🧍</div><div style="margin-left:15px; font-weight:bold; color:var(--accent)">Ich sehe <u>den</u> Mann.</div></div>
   <button onclick="this.nextElementSibling.style.display='block'; this.style.display='none'" class="btn" style="margin-top:10px; padding:6px 14px; font-size:13px; width:100%; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2); color:white;">➕ Mehr Beispiele</button>
   <div style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
@@ -720,13 +738,13 @@ const i18n = {
       profile_reset_confirm: 'Dein gesamter Fortschritt wird gelöscht. Bist du sicher?',
       profile_reset_done: 'Fortschritt zurückgesetzt',
       achievements_title: '🏆 Erfolge',
-      achievement_unlocked: '✅ Erhalten',
+      achievement_unlocked: '✅ Freigeschaltet',
       achievement_locked: '🔒',
 
       combo_label: 'KOMBO',
       combo_bonus_x2: 'x2 XP!',
       combo_bonus_x3: 'x3 XP!',
-      combo_fire: '🔥 Combo-Bonus!',
+      combo_fire: '🔥 Kombo-Bonus!',
 
       lang_title: 'Sprache',
       lang_select: '🌍 Sprache',
@@ -845,11 +863,20 @@ const i18n = {
       ai_key_offline: 'Zum Testen des Schlüssels wird Internet benötigt.',
       ai_own_key: 'eigener Schlüssel',
       ai_key_default: '⭐ Standard',
-      ai_key_make_default: '⭐ Als Standard',
+      ai_key_make_default: '⭐ Als Standard festlegen',
       ai_key_default_set: '⭐ {provider} ist jetzt die Standard-KI',
       achievement_earned: '🏆 Erfolg:',
       level_up: '⬆️ Level',
-      settings: 'Einstellungen'
+      settings: 'Einstellungen',
+      page_title: 'ArtikelMeister — Deutsche Artikel lernen',
+      cases_table_case: 'Fall',
+      cases_table_masc: 'Mask. (der)',
+      cases_table_fem: 'Fem. (die)',
+      cases_table_neut: 'Neutr. (das)',
+      cases_table_nom: 'Nominativ (Wer?)',
+      cases_table_akk: 'Akkusativ (Wen?)',
+      cases_table_dat: 'Dativ (Wem?)',
+      cases_table_gen: 'Genitiv (Wessen?)'
     },
 
     // ─────────── УКРАЇНСЬКА ───────────
@@ -1132,7 +1159,16 @@ const i18n = {
       ai_key_default_set: '⭐ {provider} тепер основний ШІ',
       achievement_earned: '🏆 Досягнення:',
       level_up: '⬆️ Рівень',
-      settings: 'Налаштування'
+      settings: 'Налаштування',
+      page_title: 'ArtikelMeister — Вивчай німецькі артиклі',
+      cases_table_case: 'Відмінок',
+      cases_table_masc: 'Чол. (der)',
+      cases_table_fem: 'Жін. (die)',
+      cases_table_neut: 'Сер. (das)',
+      cases_table_nom: 'Nominativ (називний)',
+      cases_table_akk: 'Akkusativ (знахідний)',
+      cases_table_dat: 'Dativ (давальний)',
+      cases_table_gen: 'Genitiv (родовий)'
     },
 
     // ─────────── العربية ───────────
@@ -1415,7 +1451,16 @@ const i18n = {
       ai_key_default_set: '⭐ {provider} هو الآن الذكاء الاصطناعي الافتراضي',
       achievement_earned: '🏆 :إنجاز',
       level_up: '⬆️ المستوى',
-      settings: 'الإعدادات'
+      settings: 'الإعدادات',
+      page_title: 'ArtikelMeister — تعلّم أدوات التعريف الألمانية',
+      cases_table_case: 'الحالة',
+      cases_table_masc: 'مذكر (der)',
+      cases_table_fem: 'مؤنث (die)',
+      cases_table_neut: 'محايد (das)',
+      cases_table_nom: 'Nominativ (الفاعل)',
+      cases_table_akk: 'Akkusativ (المفعول به)',
+      cases_table_dat: 'Dativ (المفعول غير المباشر)',
+      cases_table_gen: 'Genitiv (الملكية)'
     }
   },
 
@@ -1456,11 +1501,14 @@ const i18n = {
 
   // ── Apply translations to all [data-i18n] elements ──
   applyTranslations() {
+    document.title = this.t('page_title');
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       const val = this.t(key);
       if (el.tagName === 'INPUT') {
         el.placeholder = val;
+      } else if (el.hasAttribute('data-i18n-html')) {
+        el.innerHTML = val;
       } else {
         el.textContent = val;
       }

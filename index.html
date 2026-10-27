@@ -338,7 +338,7 @@
         style="margin-bottom:var(--space-lg); padding:var(--space-lg); border-radius:var(--radius-lg); background:linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(139, 92, 246, 0.1)); border:1px solid var(--border-glass);">
         <div class="section-title" style="font-size:22px; margin-bottom:12px;"><span class="gradient-text"
             data-i18n="cases_intro_title">Değişim Macerası</span></div>
-        <div style="font-size:14px; color:var(--text-secondary); line-height:1.6;" data-i18n="cases_intro_desc">
+        <div style="font-size:14px; color:var(--text-secondary); line-height:1.6;" data-i18n="cases_intro_desc" data-i18n-html>
           Almanca'da artikeller cümledeki görevlerine göre kılık değiştirir. "der" bazen "den" olur, bazen "dem". Neden
           değiştiğini ve nasıl tahmin edeceğini burada oyun oynayarak öğreneceksin!<br><br>
           <b>Nasıl Oynanır?</b><br>
@@ -366,37 +366,37 @@
               style="width:100%; border-collapse:collapse; text-align:left; background:var(--bg-glass); border-radius:var(--radius-md); overflow:hidden; font-family:var(--font-display);">
               <thead style="background:rgba(255,255,255,0.1);">
                 <tr>
-                  <th style="padding:10px 12px; font-weight:700;">Fall (Hal)</th>
-                  <th style="padding:10px 12px; font-weight:700; color:var(--der-color);">Mas. (der)</th>
-                  <th style="padding:10px 12px; font-weight:700; color:var(--die-color);">Fem. (die)</th>
-                  <th style="padding:10px 12px; font-weight:700; color:var(--das-color);">Neu. (das)</th>
+                  <th style="padding:10px 12px; font-weight:700;" data-i18n="cases_table_case">Fall (Hal)</th>
+                  <th style="padding:10px 12px; font-weight:700; color:var(--der-color);" data-i18n="cases_table_masc">Mas. (der)</th>
+                  <th style="padding:10px 12px; font-weight:700; color:var(--die-color);" data-i18n="cases_table_fem">Fem. (die)</th>
+                  <th style="padding:10px 12px; font-weight:700; color:var(--das-color);" data-i18n="cases_table_neut">Neu. (das)</th>
                   <th style="padding:10px 12px; font-weight:700; color:var(--text-muted);">Plural</th>
                 </tr>
               </thead>
               <tbody>
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                  <td style="padding:10px 12px; font-weight:bold;">Nominativ (Yalın)</td>
+                  <td style="padding:10px 12px; font-weight:bold;" data-i18n="cases_table_nom">Nominativ (Yalın)</td>
                   <td style="padding:10px 12px;">der</td>
                   <td style="padding:10px 12px;">die</td>
                   <td style="padding:10px 12px;">das</td>
                   <td style="padding:10px 12px;">die</td>
                 </tr>
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                  <td style="padding:10px 12px; font-weight:bold;">Akkusativ (-i)</td>
+                  <td style="padding:10px 12px; font-weight:bold;" data-i18n="cases_table_akk">Akkusativ (-i)</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">den</td>
                   <td style="padding:10px 12px;">die</td>
                   <td style="padding:10px 12px;">das</td>
                   <td style="padding:10px 12px;">die</td>
                 </tr>
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                  <td style="padding:10px 12px; font-weight:bold;">Dativ (-e)</td>
+                  <td style="padding:10px 12px; font-weight:bold;" data-i18n="cases_table_dat">Dativ (-e)</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">dem</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">der</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">dem</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">den (+n)</td>
                 </tr>
                 <tr>
-                  <td style="padding:10px 12px; font-weight:bold;">Genitiv (İyelik)</td>
+                  <td style="padding:10px 12px; font-weight:bold;" data-i18n="cases_table_gen">Genitiv (İyelik)</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">des (+s)</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">der</td>
                   <td style="padding:10px 12px; color:var(--accent); font-weight:800;">des (+s)</td>
@@ -595,6 +595,7 @@
 
   <script src="js/config.js"></script>
   <script src="data/i18n.js"></script>
+  <script src="data/content-i18n.js"></script>
   <script src="js/srs.js"></script>
   <script src="js/speech.js"></script>
   <script src="js/backup.js"></script>

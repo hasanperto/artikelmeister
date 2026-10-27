@@ -295,7 +295,7 @@
     if (share >= 0.6) {
       return {
         type: 'group',
-        rule: t('ai_rule_group', { group: w.category, pct: Math.round(share * 100), article }),
+        rule: t('ai_rule_group', { group: ContentI18n.wordCategory(w.category, i18n.currentLang), pct: Math.round(share * 100), article }),
         trick: t('ai_trick_color', { article, word, color: t(COLORS[article]) }),
         examples: sameArticleExamples(article, (x) => x.category === w.category, word)
       };
