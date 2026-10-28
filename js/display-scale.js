@@ -5,6 +5,7 @@
 (function () {
   const STORAGE_KEY = 'artikelmeister_text_size';
   const DESIGN_WIDTH = 375;
+  const TABLET_WIDTH = 700;
   const MIN_LAYOUT_WIDTH = 300; // ölçek ne olursa olsun düzen en az bu kadar CSS px genişlikte kalır
   const LEVELS = { small: 0.9, normal: 1, large: 1.15, xlarge: 1.3 };
 
@@ -17,9 +18,11 @@
     } catch { return 'normal'; }
   }
 
-  // 360–375px telefonlarda 1, büyüdükçe artar; tablette en fazla 1.25
+  // 360–375px telefonlarda 1, büyük telefonlarda biraz artar. Tablette (≥700px) büyütme yok:
+  // geniş ekranda düzen sütunlarla genişler, yazı ve butonlar yerel boyutta kalır.
   function autoScale(width) {
-    return Math.min(1.25, Math.max(1, width / DESIGN_WIDTH));
+    if (width >= TABLET_WIDTH) return 1;
+    return Math.min(1.15, Math.max(1, width / DESIGN_WIDTH));
   }
 
   function compute() {
