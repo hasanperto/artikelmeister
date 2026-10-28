@@ -3993,3 +3993,477 @@ body.rtl .header-xp,
     margin-bottom: var(--space-lg)
   }
 }
+
+/* ══════════════════════════════════════════
+   Profil formu, istatistik ve kademeli rozetler
+   ══════════════════════════════════════════ */
+.toast {
+  z-index: 2400;
+  max-width: calc(100vw - 32px);
+  white-space: normal;
+  text-align: center
+}
+
+/* Oluştur / düzenle formu: uzun formda kaydırılabilir */
+.avatar-modal {
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: calc(var(--safe-top) + var(--space-lg)) var(--space-md) calc(var(--safe-bottom) + var(--space-lg))
+}
+
+.profile-form {
+  width: 100%;
+  max-width: 380px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center
+}
+
+.profile-form .btn {
+  max-width: 280px
+}
+
+.profile-form .avatar-grid {
+  margin: var(--space-sm) 0 var(--space-md);
+  gap: 10px
+}
+
+.pf-label {
+  align-self: stretch;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: var(--space-sm) 0 6px
+}
+
+.pf-hint {
+  align-self: stretch;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px
+}
+
+.pf-chips {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px
+}
+
+.pf-chip {
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s
+}
+
+.pf-chip.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text-primary)
+}
+
+.pf-swatches {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: var(--space-lg)
+}
+
+.pf-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  transition: transform .2s, border-color .2s
+}
+
+.pf-swatch.selected {
+  border-color: var(--text-primary);
+  transform: scale(1.12)
+}
+
+/* Profil başlığı ve sekmeler */
+.profile-header-info {
+  flex: 1;
+  min-width: 0
+}
+
+.profile-edit-btn {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer
+}
+
+.profile-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--space-lg);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-full)
+}
+
+.profile-tab {
+  padding: 10px 6px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background .2s, color .2s
+}
+
+.profile-tab.active {
+  background: var(--accent);
+  color: #fff
+}
+
+.profile-pane {
+  display: none
+}
+
+.profile-pane.active {
+  display: block;
+  animation: fadeIn .25s ease
+}
+
+/* Ana sayfa: günlük hedef */
+.goal-card {
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  cursor: pointer
+}
+
+.goal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: var(--space-sm)
+}
+
+.goal-text {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums
+}
+
+.goal-fill {
+  background: linear-gradient(90deg, var(--success), #22c55e)
+}
+
+.goal-card.done {
+  border-color: rgba(74, 222, 128, 0.4)
+}
+
+.goal-card.done .goal-text {
+  color: var(--success)
+}
+
+/* İstatistik: aktivite grafiği */
+.stats-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm)
+}
+
+.stats-card-head .settings-title {
+  margin-bottom: 0
+}
+
+.range-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass)
+}
+
+.range-toggle button {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer
+}
+
+.range-toggle button.active {
+  background: var(--accent);
+  color: #fff
+}
+
+.activity-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  height: 140px;
+  margin: var(--space-md) 0 var(--space-sm)
+}
+
+.activity-chart.dense {
+  gap: 2px
+}
+
+.chart-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch
+}
+
+.chart-bar {
+  position: relative;
+  min-height: 3px;
+  border-radius: 4px 4px 2px 2px;
+  background: rgba(255, 71, 87, 0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden
+}
+
+.chart-bar-ok {
+  background: var(--success)
+}
+
+.chart-label {
+  height: 18px;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: visible
+}
+
+.chart-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-glass);
+  border-radius: var(--radius-md)
+}
+
+.stats-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: var(--space-lg)
+}
+
+.stats-grid-3 .stat-value {
+  font-size: 20px;
+  overflow-wrap: anywhere
+}
+
+/* Yatay çubuklar (artikel doğruluğu, modlar) */
+.hbar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px
+}
+
+.hbar-row {
+  display: grid;
+  grid-template-columns: minmax(64px, 30%) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px
+}
+
+.hbar-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.hbar-name.der { color: var(--der-color) }
+.hbar-name.die { color: var(--die-color) }
+.hbar-name.das { color: var(--das-color) }
+
+.hbar {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden
+}
+
+.hbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width .5s ease
+}
+
+.hbar-val {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: end
+}
+
+.hbar-val small {
+  font-weight: 500;
+  color: var(--text-muted)
+}
+
+/* Kademeli rozetler */
+.badges-summary {
+  margin-bottom: var(--space-lg)
+}
+
+.badges-summary-text {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: var(--space-sm)
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl)
+}
+
+.badge-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center
+}
+
+.badge-card.tier-0 .badge-icon {
+  filter: grayscale(1);
+  opacity: .45
+}
+
+.badge-card.tier-1 { border-color: rgba(205, 127, 50, .5) }
+.badge-card.tier-2 { border-color: rgba(192, 192, 210, .6) }
+.badge-card.tier-3 {
+  border-color: rgba(251, 191, 36, .7);
+  background: rgba(251, 191, 36, .07)
+}
+
+.badge-icon {
+  position: relative;
+  display: inline-block;
+  font-size: 34px;
+  margin-bottom: var(--space-sm)
+}
+
+.badge-medal {
+  position: absolute;
+  right: -14px;
+  bottom: -4px;
+  font-size: 18px
+}
+
+.tier-pips {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 6px 0
+}
+
+.tier-pip {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .1)
+}
+
+.tier-pip.t1.on { background: #CD7F32 }
+.tier-pip.t2.on { background: #C0C0D2 }
+.tier-pip.t3.on { background: #FBBF24 }
+
+.badge-progress {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, .06);
+  overflow: hidden
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit
+}
+
+.badge-progress-text {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums
+}
+
+@media (min-width: 700px) {
+  .badge-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
+}
+
+@media (max-width: 360px) {
+  .stats-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+  .profile-header {
+    flex-wrap: wrap
+  }
+}
+
+.chart-bar.zero {
+  background: rgba(255, 255, 255, 0.08)
+}
+
+@media (max-width: 420px) {
+  .profile-tab {
+    font-size: 12px;
+    padding: 10px 2px
+  }
+}

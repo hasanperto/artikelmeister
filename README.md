@@ -8,6 +8,9 @@ Almanca **der / die / das** artikellerini oyunlaştırılmış yöntemlerle öğ
 
 - Quiz, hal alıştırmaları ve öğren modu
 - 🤖 AI Koç (Gemini · Claude · MiniMax): AI Quiz + püf noktası, Artikel Dedektifi, Cümle Ustası — internetsizken kural tabanlı ipuçları
+- Profil oluşturma / düzenleme: avatar, seviye (A1 · A2–B1 · B2+), günlük hedef, profil başına dil ve renk
+- İstatistik: 7/30 günlük aktivite grafiği, artikel bazında doğruluk, modlara göre oyun, çalışma süresi
+- 19 kademeli rozet (🥉 bronz · 🥈 gümüş · 🥇 altın) + ilerleme çubukları
 - Akıllı tekrar (Leitner): yanlış yapılan kelimeler daha sık sorulur, Profil'de "Zayıf kelimelerim"
 - Almanca sesli telaffuz (APK'da Android ses motoru, internetsiz)
 - İlerleme yedekleme / geri yükleme (JSON dosyası; telefon değiştirirken)

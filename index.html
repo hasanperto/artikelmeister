@@ -37,14 +37,25 @@
 
   <!-- Avatar Picker Modal -->
   <div class="avatar-modal hidden" id="avatar-modal">
-    <div class="avatar-modal-title" data-i18n="create_profile">Profil Oluştur</div>
-    <input type="text" class="name-input" id="profile-name-input" data-i18n="name_placeholder" placeholder="İsmin..."
-      maxlength="20">
-    <div class="avatar-grid" id="avatar-grid"></div>
-    <button class="btn btn-primary" style="max-width:280px" onclick="App.profiles.create()" data-i18n="create_btn">✨
-      Oluştur</button>
-    <button class="btn btn-secondary" style="max-width:280px;margin-top:8px" onclick="App.profiles.closeModal()"
-      data-i18n="cancel">İptal</button>
+    <div class="profile-form">
+      <div class="avatar-modal-title" id="profile-modal-title">Profil Oluştur</div>
+      <input type="text" class="name-input" id="profile-name-input" data-i18n="name_placeholder" placeholder="İsmin..."
+        maxlength="20">
+      <div class="pf-label" data-i18n="pf_avatar">Avatar</div>
+      <div class="avatar-grid" id="avatar-grid"></div>
+      <div class="pf-label" data-i18n="pf_level">Seviye</div>
+      <div class="pf-chips" id="pf-level"></div>
+      <div class="pf-hint" data-i18n="pf_level_hint"></div>
+      <div class="pf-label" data-i18n="pf_goal">Günlük hedef</div>
+      <div class="pf-chips" id="pf-goal"></div>
+      <div class="pf-label" data-i18n="pf_lang">Uygulama dili</div>
+      <div class="pf-chips" id="pf-lang"></div>
+      <div class="pf-label" data-i18n="pf_theme">Renk</div>
+      <div class="pf-swatches" id="pf-theme"></div>
+      <button class="btn btn-primary" id="profile-save-btn" onclick="App.profiles.save()">✨ Oluştur</button>
+      <button class="btn btn-secondary" style="margin-top:8px" onclick="App.profiles.closeModal()"
+        data-i18n="cancel">İptal</button>
+    </div>
   </div>
 
   <!-- Language Modal -->
@@ -146,6 +157,17 @@
         </div>
         <div class="level-bar">
           <div class="level-bar-fill" id="level-bar-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Daily Goal -->
+      <div class="goal-card" onclick="App.navigate('profile');App.profile.setTab('stats')">
+        <div class="goal-head">
+          <span data-i18n="goal_title">🎯 Günlük hedef</span>
+          <span class="goal-text" id="goal-text">0 / 20</span>
+        </div>
+        <div class="level-bar">
+          <div class="level-bar-fill goal-fill" id="goal-fill" style="width:0%"></div>
         </div>
       </div>
 
@@ -475,7 +497,17 @@
           <div class="profile-header-name" id="profile-header-name">Öğrenci</div>
           <div class="profile-header-level" id="profile-header-level">Seviye 1 — Anfänger</div>
         </div>
+        <button type="button" class="profile-edit-btn" onclick="App.profiles.openModal(App.currentProfile)"
+          data-i18n="profile_edit">✏️ Düzenle</button>
       </div>
+
+      <div class="profile-tabs" role="tablist">
+        <button type="button" class="profile-tab active" data-tab="overview" role="tab" onclick="App.profile.setTab('overview')" data-i18n="tab_overview">👤 Profil</button>
+        <button type="button" class="profile-tab" data-tab="stats" role="tab" onclick="App.profile.setTab('stats')" data-i18n="tab_stats">📊 İstatistik</button>
+        <button type="button" class="profile-tab" data-tab="badges" role="tab" onclick="App.profile.setTab('badges')" data-i18n="tab_badges">🏆 Başarılar</button>
+      </div>
+
+      <div class="profile-pane active" id="pane-overview">
 
       <div class="level-bar-container">
         <div class="level-info">
@@ -487,24 +519,6 @@
         </div>
         <div class="level-bar">
           <div class="level-bar-fill" id="profile-level-bar" style="width:0%"></div>
-        </div>
-      </div>
-
-      <div class="glass-card"
-        style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:var(--space-lg);margin-bottom:var(--space-lg)">
-        <div style="font-weight:700;font-size:15px;margin-bottom:var(--space-sm)" data-i18n="profile_article_dist">📊
-          Artikel Dağılımı</div>
-        <div class="article-dist" id="article-dist"></div>
-        <div class="article-dist-legend">
-          <div class="article-dist-item">
-            <div class="article-dist-dot" style="background:var(--der-color)"></div><span id="dist-der">0</span> der
-          </div>
-          <div class="article-dist-item">
-            <div class="article-dist-dot" style="background:var(--die-color)"></div><span id="dist-die">0</span> die
-          </div>
-          <div class="article-dist-item">
-            <div class="article-dist-dot" style="background:var(--das-color)"></div><span id="dist-das">0</span> das
-          </div>
         </div>
       </div>
 
@@ -525,14 +539,6 @@
           <div class="stat-value" id="profile-games" style="color:var(--die-color)">0</div>
           <div class="stat-label" data-i18n="stats_games">Oyun</div>
         </div>
-      </div>
-
-      <div class="settings-card">
-        <div class="settings-title" data-i18n="weak_title">🧠 Zayıf kelimelerim</div>
-        <div class="srs-summary" id="srs-summary"></div>
-        <div class="weak-list" id="weak-list"></div>
-        <button type="button" class="btn btn-primary hidden" id="weak-practice-btn" onclick="App.quiz.startWeak()"
-          data-i18n="weak_practice">🎯 Bunları çalış</button>
       </div>
 
       <div class="settings-card speech-setting">
@@ -568,14 +574,72 @@
         </div>
       </div>
 
-      <div class="section-title" style="font-size:20px" data-i18n="achievements_title">🏆 Başarılar</div>
-      <div class="achievement-grid" id="achievements-grid"></div>
-
       <button class="btn btn-secondary" onclick="App.profiles.switchProfile()" style="margin-top:24px"
         data-i18n="profile_switch">👤 Profil Değiştir</button>
       <button class="btn btn-danger" onclick="App.resetProgress()" style="margin-top:10px" data-i18n="profile_reset">🗑️
         İlerlemeyi Sıfırla</button>
       <div class="app-version" id="app-version"></div>
+      </div>
+
+      <div class="profile-pane" id="pane-stats">
+        <div class="settings-card">
+          <div class="stats-card-head">
+            <div class="settings-title" data-i18n="stats_activity">📈 Aktivite</div>
+            <div class="range-toggle" id="stats-range">
+              <button type="button" data-range="7" class="active" onclick="App.profile.setRange(7)" data-i18n="stats_7d">7 gün</button>
+              <button type="button" data-range="30" onclick="App.profile.setRange(30)" data-i18n="stats_30d">30 gün</button>
+            </div>
+          </div>
+          <div class="activity-chart" id="activity-chart"></div>
+          <div class="settings-desc" id="activity-summary"></div>
+        </div>
+
+        <div class="stats-grid stats-grid-3" id="stats-tiles"></div>
+
+        <div class="settings-card">
+          <div class="settings-title" data-i18n="stats_article_acc">🎯 Artikel doğruluğu</div>
+          <div class="hbar-list" id="article-accuracy"></div>
+        </div>
+
+      <div class="glass-card"
+        style="background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:var(--space-lg);margin-bottom:var(--space-lg)">
+        <div style="font-weight:700;font-size:15px;margin-bottom:var(--space-sm)" data-i18n="profile_article_dist">📊
+          Artikel Dağılımı</div>
+        <div class="article-dist" id="article-dist"></div>
+        <div class="article-dist-legend">
+          <div class="article-dist-item">
+            <div class="article-dist-dot" style="background:var(--der-color)"></div><span id="dist-der">0</span> der
+          </div>
+          <div class="article-dist-item">
+            <div class="article-dist-dot" style="background:var(--die-color)"></div><span id="dist-die">0</span> die
+          </div>
+          <div class="article-dist-item">
+            <div class="article-dist-dot" style="background:var(--das-color)"></div><span id="dist-das">0</span> das
+          </div>
+        </div>
+      </div>
+
+        <div class="settings-card">
+          <div class="settings-title" data-i18n="stats_modes">🎮 Modlara göre oyun</div>
+          <div class="hbar-list" id="mode-stats"></div>
+        </div>
+
+      <div class="settings-card">
+        <div class="settings-title" data-i18n="weak_title">🧠 Zayıf kelimelerim</div>
+        <div class="srs-summary" id="srs-summary"></div>
+        <div class="weak-list" id="weak-list"></div>
+        <button type="button" class="btn btn-primary hidden" id="weak-practice-btn" onclick="App.quiz.startWeak()"
+          data-i18n="weak_practice">🎯 Bunları çalış</button>
+      </div>
+
+      </div>
+
+      <div class="profile-pane" id="pane-badges">
+        <div class="badges-summary" id="badges-summary"></div>
+        <div class="badge-grid" id="badge-grid"></div>
+        <div class="section-title" style="font-size:20px" data-i18n="badges_special">⭐ Özel rozetler</div>
+        <div class="achievement-grid" id="achievements-grid"></div>
+      </div>
     </section>
   </div>
 
@@ -597,6 +661,7 @@
   <script src="data/i18n.js"></script>
   <script src="data/content-i18n.js"></script>
   <script src="js/srs.js"></script>
+  <script src="js/stats.js"></script>
   <script src="js/speech.js"></script>
   <script src="js/backup.js"></script>
   <script src="js/app.js"></script>

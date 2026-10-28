@@ -15,6 +15,17 @@ function jsArg(val) {
 }
 
 const AVATARS = ['🧑‍🎓', '👨‍💻', '👩‍🏫', '🦊', '🐻', '🦉', '🐱', '🐶', '🦁', '🐨', '🎮', '🎯', '⭐', '🚀', '🌟', '👑', '💎', '🔥', '🌈', '🎪'];
+// Profil seviyesi: Quiz ve Hız Turu'nda sorulacak en yüksek kelime zorluğu (words.difficulty 1–3)
+const PROFILE_LEVELS = [
+    { id: 'beginner', maxDifficulty: 1 },
+    { id: 'intermediate', maxDifficulty: 2 },
+    { id: 'advanced', maxDifficulty: 3 }
+];
+const PROFILE_THEMES = {
+    violet: '#8B5CF6', sky: '#0EA5E9', teal: '#14B8A6', orange: '#F97316', pink: '#EC4899', gold: '#EAB308'
+};
+const DAILY_GOALS = [10, 20, 30, 50];
+const DEFAULT_GOAL = 20;
 const MOTIVATIONS = {
     tr: ['Bugün harika bir gün Almanca öğrenmek için! 🌟', 'Her doğru cevap seni bir adım ileriye taşır! 🚀', 'Artikel ustası olma yolunda ilerliyorsun! 💪', 'Pratik mükemmelleştirir! 🎯', 'Kombo serisi kır, bonus XP kazan! 🔥', 'Küçük adımlar, büyük sonuçlar! ⭐', 'Almanca artikeller artık kolay! 🇩🇪'],
     en: ['Today is a great day to learn German! 🌟', 'Every correct answer takes you one step further! 🚀', 'You\'re on your way to becoming an Article master! 💪', 'Practice makes perfect! 🎯', 'Break combo streaks, earn bonus XP! 🔥', 'Small steps, big results! ⭐', 'German articles made easy! 🇩🇪'],
@@ -225,6 +236,15 @@ const App = {
         },
 
         set(code) {
+            this.apply(code);
+            if (App.currentProfile) {
+                App.profiles.data[App.currentProfile].lang = code;
+                App.profiles.saveAll();
+            }
+            App.showToast('✅ ' + i18n.languages.find(l => l.code === code).name, 'success');
+        },
+
+        apply(code) {
             i18n.setLang(code);
             ContentI18n.apply(window.DB, code);
             this.updateFlag();
@@ -242,7 +262,6 @@ const App = {
             if (App.currentSection === 'learn') App.learn.render();
             if (App.currentSection === 'rules') App.rules.render();
             if (App.currentSection === 'profile') { App.profile.renderAchievements(); window.AICoach?.renderKeys(); }
-            App.showToast('✅ ' + i18n.languages.find(l => l.code === code).name, 'success');
         },
 
         updateFlag() {
@@ -314,40 +333,81 @@ const App = {
             container.innerHTML = html;
         },
 
-        openModal() {
-            document.getElementById('avatar-modal').classList.remove('hidden');
-            const grid = document.getElementById('avatar-grid');
-            grid.innerHTML = AVATARS.map((a, i) =>
-                `<div class="avatar-option${i === 0 ? ' selected' : ''}" data-avatar="${a}" onclick="App.profiles.pickAvatar(this)">${a}</div>`
+        // editId verilirse mevcut profili düzenler, yoksa yeni profil oluşturur
+        openModal(editId) {
+            const p = editId ? this.data[editId] : null;
+            this._editId = p ? editId : null;
+            this._form = {
+                avatar: p?.avatar || AVATARS[0],
+                level: p?.level || (p ? 'advanced' : 'intermediate'),
+                goal: p?.goal || DEFAULT_GOAL,
+                lang: p?.lang || i18n.currentLang,
+                theme: p?.theme || 'violet'
+            };
+            document.getElementById('profile-modal-title').textContent = i18n.t(p ? 'edit_profile' : 'create_profile');
+            document.getElementById('profile-save-btn').textContent = i18n.t(p ? 'save_btn' : 'create_btn');
+            const input = document.getElementById('profile-name-input');
+            input.value = p?.name || '';
+            this.renderForm();
+            const modal = document.getElementById('avatar-modal');
+            modal.classList.remove('hidden');
+            modal.scrollTop = 0;
+            input.focus();
+        },
+
+        renderForm() {
+            const f = this._form;
+            const chip = (field, value, label, on) =>
+                `<button type="button" class="pf-chip${on ? ' selected' : ''}" onclick="App.profiles.pick('${field}', ${jsArg(value)})">${esc(label)}</button>`;
+            document.getElementById('avatar-grid').innerHTML = AVATARS.map(a =>
+                `<div class="avatar-option${a === f.avatar ? ' selected' : ''}" onclick="App.profiles.pick('avatar', ${jsArg(a)})">${a}</div>`
             ).join('');
-            document.getElementById('profile-name-input').value = '';
-            document.getElementById('profile-name-input').focus();
-            this._selectedAvatar = AVATARS[0];
+            document.getElementById('pf-level').innerHTML = PROFILE_LEVELS.map(l =>
+                chip('level', l.id, i18n.t('level_' + l.id), l.id === f.level)).join('');
+            document.getElementById('pf-goal').innerHTML = DAILY_GOALS.map(g =>
+                chip('goal', g, String(g), g === f.goal)).join('');
+            document.getElementById('pf-lang').innerHTML = i18n.languages.map(l =>
+                chip('lang', l.code, `${l.flag} ${l.name}`, l.code === f.lang)).join('');
+            document.getElementById('pf-theme').innerHTML = Object.entries(PROFILE_THEMES).map(([id, color]) =>
+                `<button type="button" class="pf-swatch${id === f.theme ? ' selected' : ''}" style="--swatch:${color}" aria-label="${id}" onclick="App.profiles.pick('theme', '${id}')"></button>`
+            ).join('');
+        },
+
+        pick(field, value) {
+            this._form[field] = field === 'goal' ? Number(value) : value;
+            this.renderForm();
+            if (field === 'theme') App.applyTheme(value);
         },
 
         closeModal() {
             document.getElementById('avatar-modal').classList.add('hidden');
+            // Önizlenen rengi geri al
+            App.applyTheme(App.currentProfile ? this.data[App.currentProfile]?.theme : null);
         },
 
-        pickAvatar(el) {
-            document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-            el.classList.add('selected');
-            this._selectedAvatar = el.dataset.avatar;
-        },
-
-        create() {
+        save() {
             const name = document.getElementById('profile-name-input').value.trim();
-            if (!name) { App.showToast('⚠️', 'error'); return; }
+            if (!name) { App.showToast(i18n.t('name_required'), 'error'); return; }
+            const f = this._form;
+            const fields = { name, avatar: f.avatar, level: f.level, goal: f.goal, lang: f.lang, theme: f.theme };
+
+            if (this._editId && this.data[this._editId]) {
+                Object.assign(this.data[this._editId], fields);
+                this.saveAll();
+                document.getElementById('avatar-modal').classList.add('hidden');
+                this.select(this._editId, true);
+                App.showToast(i18n.t('profile_saved'), 'success');
+                return;
+            }
 
             const id = 'p_' + Date.now();
             this.data[id] = {
-                name: name,
-                avatar: this._selectedAvatar || '🧑‍🎓',
+                ...fields,
                 createdAt: new Date().toISOString(),
                 progress: App.getDefaultProgress()
             };
             this.saveAll();
-            this.closeModal();
+            document.getElementById('avatar-modal').classList.add('hidden');
             this.select(id);
         },
 
@@ -356,7 +416,10 @@ const App = {
             const profile = this.data[id];
             profile.progress = { ...App.getDefaultProgress(), ...profile.progress };
             App.progress = profile.progress;
+            Stats.ensure(App.progress);
             localStorage.setItem('artikelmeister_lastProfile', id);
+            App.applyTheme(profile.theme);
+            if (profile.lang && profile.lang !== i18n.currentLang && i18n.translations[profile.lang]) App.lang.apply(profile.lang);
 
             document.getElementById('login-screen').classList.add('hidden');
 
@@ -376,6 +439,7 @@ const App = {
             App.updateUI();
             App.learn.init();
             App.rules.init();
+            App.checkBadges(true);
             App.profile.renderAchievements();
             App.tips.showDaily();
         },
@@ -442,8 +506,87 @@ const App = {
             gamesPlayed: 0, bestStreak: 0,
             bestSpeed: 0, totalCombo: 0,
             achievements: [], rulesRead: [],
-            wordStats: {}
+            wordStats: {}, stats: {}, badgeTiers: {}
         };
+    },
+
+    // ── PROFİL TERCİHLERİ ──
+    applyTheme(theme) {
+        const color = PROFILE_THEMES[theme] || PROFILE_THEMES.violet;
+        const root = document.documentElement.style;
+        root.setProperty('--accent', color);
+        root.setProperty('--accent-glow', `0 0 30px ${color}4d`);
+    },
+
+    currentProfileData() {
+        return this.currentProfile ? this.profiles.data[this.currentProfile] : null;
+    },
+
+    dailyGoal() {
+        return this.currentProfileData()?.goal || DEFAULT_GOAL;
+    },
+
+    // Profil seviyesine uygun kelimeler; seçilen zorlukta yeterli kelime yoksa hepsi
+    wordPool() {
+        const level = PROFILE_LEVELS.find(l => l.id === this.currentProfileData()?.level);
+        if (!level) return DB.words;
+        const pool = DB.words.filter(w => (w.difficulty || 1) <= level.maxDifficulty);
+        return pool.length >= 30 ? pool : DB.words;
+    },
+
+    // ── İSTATİSTİK & KADEMELİ ROZETLER (js/stats.js) ──
+    trackAnswer(article, correct) {
+        const goal = this.dailyGoal();
+        const before = Stats.today(this.progress).a;
+        Stats.answer(this.progress, article, correct, goal);
+        if (before < goal && before + 1 >= goal) {
+            this.showToast(i18n.t('goal_done'), 'success');
+            this.launchConfetti();
+        }
+        this.renderGoal();
+    },
+
+    trackGame(mode, correct, total) {
+        Stats.game(this.progress, mode, correct, total);
+        this.saveProgress();
+        this.checkBadges();
+    },
+
+    // silent: profil açılışında eski ilerlemeden gelen kademeler tek bildirimle verilir
+    checkBadges(silent) {
+        if (!this.progress || !window.Stats) return;
+        this.checkExceptionHunter();
+        const gained = Stats.evaluate(this.progress);
+        if (!gained.length) return;
+        const xp = gained.reduce((sum, g) => sum + g.xp, 0);
+        if (silent) {
+            this.showToast(i18n.t('badges_silent', { n: gained.length }), 'success');
+        } else {
+            gained.forEach(g => this.showToast(i18n.t('badge_toast', {
+                medal: Stats.TIER_ICONS[g.tier], title: i18n.t('badge_' + g.badge.id), tier: i18n.t('tier_' + g.tier)
+            }), 'success'));
+            this.launchConfetti();
+        }
+        this.addXP(xp);
+        if (this.currentSection === 'profile') this.profile.renderAchievements();
+    },
+
+    // Tüm istisna kelimeleri en az bir kez doğru bilinince
+    checkExceptionHunter() {
+        if (this.progress.achievements.includes('exception_hunter')) return;
+        const exceptions = DB.words.filter(w => w.isException);
+        if (exceptions.length && exceptions.every(w => SRS.statsFor(this.progress, w.id)?.right > 0)) {
+            this.checkAchievement('exception_hunter');
+        }
+    },
+
+    renderGoal() {
+        if (!this.progress) return;
+        const goal = this.dailyGoal();
+        const done = Stats.today(this.progress).a;
+        document.getElementById('goal-text').textContent = `${Math.min(done, goal)} / ${goal}`;
+        document.getElementById('goal-fill').style.width = Math.min(100, (done / goal) * 100) + '%';
+        document.querySelector('.goal-card')?.classList.toggle('done', done >= goal);
     },
 
     saveProgress() {
@@ -482,6 +625,7 @@ const App = {
                 this.progress.streakDays = diff === 1 ? this.progress.streakDays + 1 : 1;
             } else { this.progress.streakDays = 1; }
             this.progress.lastPlayDate = today;
+            Stats.streak(this.progress);
         }
         this.saveProgress(); this.updateUI();
     },
@@ -489,6 +633,7 @@ const App = {
     // ── XP & LEVEL ──
     addXP(amount) {
         this.progress.xp += amount;
+        Stats.addXP(this.progress, amount);
         const oldLevel = this.progress.level;
         for (let i = DB.levels.length - 1; i >= 0; i--) {
             if (this.progress.xp >= DB.levels[i].xpRequired) { this.progress.level = DB.levels[i].level; break; }
@@ -501,6 +646,7 @@ const App = {
         document.getElementById('header-xp').classList.add('pulse');
         setTimeout(() => document.getElementById('header-xp').classList.remove('pulse'), 500);
         this.saveProgress(); this.updateUI();
+        this.checkBadges();
     },
 
     showXPFloat(amount) {
@@ -548,6 +694,7 @@ const App = {
         document.getElementById('profile-games').textContent = p.gamesPlayed;
 
         this.updateArticleDist();
+        this.renderGoal();
     },
 
     updateArticleDist() {
@@ -594,10 +741,22 @@ const App = {
     },
 
     // ── TOAST ──
+    _toasts: [],
     showToast(msg, type = 'info') {
+        if (this._toasts.length >= 4) return;
+        this._toasts.push({ msg, type });
+        if (this._toasts.length === 1) this._nextToast();
+    },
+
+    _nextToast() {
+        const item = this._toasts[0];
+        if (!item) return;
         const t = document.getElementById('toast');
-        t.textContent = msg; t.className = `toast ${type} show`;
-        setTimeout(() => t.classList.remove('show'), 2800);
+        t.textContent = item.msg; t.className = `toast ${item.type} show`;
+        setTimeout(() => {
+            t.classList.remove('show');
+            setTimeout(() => { this._toasts.shift(); this._nextToast(); }, 350);
+        }, this._toasts.length > 1 ? 1800 : 2800);
     },
 
     showFeedback(correct) {
@@ -955,7 +1114,7 @@ const App = {
             // 'weak' yalnızca bir sonraki quiz için geçerli; tekrar dene normal quiz başlatır
             const weak = this.nextMode === 'weak' ? SRS.weakWords(App.progress, DB.words, 10) : [];
             this.nextMode = 'normal';
-            this.questions = (weak.length ? weak : SRS.pickQuiz(App.progress, DB.words, 10)).map(w => ({ ...w }));
+            this.questions = (weak.length ? weak : SRS.pickQuiz(App.progress, App.wordPool(), 10)).map(w => ({ ...w }));
             this.current = 0; this.correct = 0; this.wrong = 0; this.streak = 0; this.comboBonusXP = 0; this.answered = false;
             this.renderProgress(); this.showQuestion();
             App.showCombo(0);
@@ -1025,6 +1184,7 @@ const App = {
             const isCorrect = article === q.article;
             q._correct = isCorrect;
             SRS.record(App.progress, q.id, isCorrect);
+            App.trackAnswer(q.article, isCorrect);
             if (Speech.autoEnabled()) Speech.speak(`${q.article} ${q.word}`);
 
             if (isCorrect) {
@@ -1085,6 +1245,7 @@ const App = {
             document.getElementById('results-retry').textContent = i18n.t('results_retry');
             document.getElementById('results-retry').onclick = () => { document.getElementById('results').classList.add('hidden'); App.quiz.init(); };
 
+            App.trackGame('quiz', this.correct, total);
             App.addXP(xp);
             if (pct === 100 && total >= 10) App.checkAchievement('perfect_10');
             if (pct === 100) App.launchConfetti();
@@ -1132,7 +1293,7 @@ const App = {
 
         start() {
             this.running = true; this.timeLeft = 60; this.score = 0; this.streak = 0;
-            this.wordsPool = [...DB.words].sort(() => Math.random() - 0.5);
+            this.wordsPool = [...App.wordPool()].sort(() => Math.random() - 0.5);
             document.getElementById('speed-start-btn').style.display = 'none';
             ['speed-btn-der', 'speed-btn-die', 'speed-btn-das'].forEach(id => {
                 document.getElementById(id).disabled = false; document.getElementById(id).style.opacity = '1';
@@ -1149,7 +1310,7 @@ const App = {
         },
 
         nextWord() {
-            if (!this.wordsPool.length) this.wordsPool = [...DB.words].sort(() => Math.random() - 0.5);
+            if (!this.wordsPool.length) this.wordsPool = [...App.wordPool()].sort(() => Math.random() - 0.5);
             this.currentWord = this.wordsPool.pop();
             document.getElementById('speed-word').textContent = this.currentWord.word;
             document.getElementById('speed-translation').textContent =
@@ -1164,6 +1325,7 @@ const App = {
             if (!this.running) return;
             const correct = article === this.currentWord.article;
             SRS.record(App.progress, this.currentWord.id, correct);
+            App.trackAnswer(this.currentWord.article, correct);
             if (correct) {
                 this.score++; this.streak++;
                 document.getElementById('speed-score').textContent = this.score;
@@ -1206,6 +1368,7 @@ const App = {
             document.getElementById('results-continue').onclick = () => { document.getElementById('results').classList.add('hidden'); App.navigate('home'); };
             document.getElementById('results-retry').textContent = i18n.t('results_retry');
             document.getElementById('results-retry').onclick = () => { document.getElementById('results').classList.add('hidden'); App.speed.reset(); App.speed.start(); };
+            App.trackGame('speed', this.score, 0);
             App.addXP(xp);
             if (this.score >= 20) App.checkAchievement('speed_demon');
         },
@@ -1468,6 +1631,7 @@ const App = {
 
             App.progress.totalCorrect += isCorrect ? 1 : 0;
             App.progress.totalWrong += isCorrect ? 0 : 1;
+            App.trackAnswer(null, isCorrect);
             App.saveProgress();
             this.renderProgress();
 
@@ -1511,6 +1675,7 @@ const App = {
             document.getElementById('results-retry').textContent = i18n.t('results_retry');
             document.getElementById('results-retry').onclick = () => { document.getElementById('results').classList.add('hidden'); App.cases.startPractice(); };
 
+            App.trackGame('cases', this.correct, this.pool.length);
             App.addXP(xp);
 
             if (pct >= 80) App.checkAchievement('cases_master');
@@ -1526,18 +1691,134 @@ const App = {
     // PROFILE/ACHIEVEMENTS
     // ══════════════════════════
     profile: {
+        tab: 'overview',
+        range: 7,
+
+        setTab(tab) {
+            this.tab = tab;
+            document.querySelectorAll('.profile-tab').forEach(b => {
+                const on = b.dataset.tab === tab;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            document.querySelectorAll('.profile-pane').forEach(p => p.classList.toggle('active', p.id === `pane-${tab}`));
+            this.renderAchievements();
+        },
+
+        setRange(days) {
+            this.range = days;
+            document.querySelectorAll('#stats-range button').forEach(b => b.classList.toggle('active', Number(b.dataset.range) === days));
+            this.renderStats();
+        },
+
+        // Profil ekranının tüm dinamik bölümleri
         renderAchievements() {
-            const grid = document.getElementById('achievements-grid');
-            let html = '';
-            DB.achievements.forEach(ach => {
-                const unlocked = App.progress.achievements.includes(ach.id);
-                html += `<div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+            if (!App.progress) return;
+            Stats.ensure(App.progress);
+            this.renderBadges();
+            this.renderStats();
+        },
+
+        formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            return m >= 60 ? i18n.t('time_hm', { h: Math.floor(m / 60), m: m % 60 }) : i18n.t('time_m', { m });
+        },
+
+        locale() {
+            return { tr: 'tr-TR', en: 'en-GB', de: 'de-DE', uk: 'uk-UA', ar: 'ar' }[i18n.currentLang] || 'en-GB';
+        },
+
+        renderStats() {
+            const p = App.progress;
+            const st = p.stats;
+
+            // Aktivite grafiği: gün başına doğru/yanlış
+            const days = Stats.lastDays(p, this.range);
+            const max = Math.max(1, ...days.map(d => d.a));
+            const fmtLabel = new Intl.DateTimeFormat(this.locale(), this.range === 7 ? { weekday: 'short' } : { day: 'numeric' });
+            const fmtTip = new Intl.DateTimeFormat(this.locale(), { day: 'numeric', month: 'short' });
+            const chart = document.getElementById('activity-chart');
+            const total = days.reduce((sum, d) => sum + d.a, 0);
+            const correct = days.reduce((sum, d) => sum + d.c, 0);
+            if (!total) {
+                chart.innerHTML = `<div class="chart-empty">${esc(i18n.t('stats_chart_empty'))}</div>`;
+            } else {
+                chart.innerHTML = days.map((d, i) => {
+                    const h = (d.a / max) * 100;
+                    const ch = d.a ? (d.c / d.a) * 100 : 0;
+                    const showLabel = this.range === 7 || i % 5 === 4 || i === days.length - 1;
+                    const tip = i18n.t('stats_bar_tip', { date: fmtTip.format(d.date), c: d.c, w: d.a - d.c });
+                    return `<div class="chart-col" title="${esc(tip)}">
+            <div class="chart-bar${d.a ? '' : ' zero'}" style="height:${h}%"><div class="chart-bar-ok" style="height:${ch}%"></div></div>
+            <div class="chart-label">${showLabel ? esc(fmtLabel.format(d.date)) : ''}</div></div>`;
+                }).join('');
+            }
+            chart.classList.toggle('dense', this.range > 7);
+            document.getElementById('activity-summary').textContent = total
+                ? i18n.t('stats_period', { a: total, p: Math.round((correct / total) * 100) }) : '';
+
+            // Özet kutucuklar
+            const tiles = [
+                [Stats.today(p).a, 'stats_today', 'var(--accent)'],
+                [this.formatTime(st.studySec), 'stats_time', 'var(--xp-color)'],
+                [st.activeDays, 'stats_active_days', 'var(--success)'],
+                [st.bestStreakDays, 'stats_best_days', 'var(--combo-color)'],
+                [st.perfect, 'stats_perfect', 'var(--die-color)'],
+                [(p.wordsMastered || []).length, 'stats_mastered', 'var(--der-color)']
+            ];
+            document.getElementById('stats-tiles').innerHTML = tiles.map(([v, key, color]) =>
+                `<div class="stat-card"><div class="stat-value" style="color:${color}">${esc(v)}</div><div class="stat-label">${esc(i18n.t(key))}</div></div>`
+            ).join('');
+
+            // Artikel doğruluğu
+            document.getElementById('article-accuracy').innerHTML = ['der', 'die', 'das'].map(a => {
+                const { c, w } = st.article[a];
+                const pct = c + w ? Math.round((c / (c + w)) * 100) : 0;
+                return `<div class="hbar-row"><span class="hbar-name ${a}">${a}</span>
+          <div class="hbar"><div class="hbar-fill" style="width:${pct}%;background:var(--${a}-color)"></div></div>
+          <span class="hbar-val">${pct}% <small>${c}/${c + w}</small></span></div>`;
+            }).join('');
+
+            // Modlara göre oyun sayısı
+            const modes = [['quiz', 'mode_quiz', '🎯'], ['speed', 'mode_speed', '⚡'], ['cases', 'mode_cases', '🧩'], ['ai', 'mode_ai', '🤖']];
+            const modeMax = Math.max(1, ...modes.map(([m]) => st.modes[m]));
+            document.getElementById('mode-stats').innerHTML = modes.map(([m, key, icon]) =>
+                `<div class="hbar-row"><span class="hbar-name">${icon} ${esc(i18n.t(key))}</span>
+          <div class="hbar"><div class="hbar-fill" style="width:${(st.modes[m] / modeMax) * 100}%"></div></div>
+          <span class="hbar-val">${st.modes[m]}</span></div>`
+            ).join('');
+        },
+
+        renderBadges() {
+            const p = App.progress;
+            let earned = 0;
+            const totalTiers = Stats.BADGES.length * 3;
+            document.getElementById('badge-grid').innerHTML = Stats.BADGES.map(b => {
+                const bs = Stats.badgeState(p, b);
+                earned += bs.tier;
+                const target = bs.next ?? b.tiers[b.tiers.length - 1];
+                const pips = [1, 2, 3].map(t => `<span class="tier-pip t${t}${bs.tier >= t ? ' on' : ''}"></span>`).join('');
+                return `<div class="badge-card tier-${bs.tier}">
+          <div class="badge-icon">${b.icon}${bs.tier ? `<span class="badge-medal">${Stats.TIER_ICONS[bs.tier]}</span>` : ''}</div>
+          <div class="achievement-title">${esc(i18n.t('badge_' + b.id))}</div>
+          <div class="achievement-desc">${esc(i18n.t('badge_' + b.id + '_desc', { n: target }))}</div>
+          <div class="tier-pips">${pips}</div>
+          <div class="badge-progress"><div class="badge-progress-fill" style="width:${bs.pct}%"></div></div>
+          <div class="badge-progress-text">${bs.next === null ? esc(i18n.t('badge_maxed')) : `${Math.min(bs.value, bs.next)} / ${bs.next}`}</div></div>`;
+            }).join('');
+            document.getElementById('badges-summary').innerHTML =
+                `<div class="badges-summary-text">${esc(i18n.t('badges_summary', { n: earned, total: totalTiers }))}</div>
+        <div class="level-bar"><div class="level-bar-fill" style="width:${(earned / totalTiers) * 100}%"></div></div>`;
+
+            // Sunucudan gelen tek seferlik rozetler
+            document.getElementById('achievements-grid').innerHTML = DB.achievements.map(ach => {
+                const unlocked = p.achievements.includes(ach.id);
+                return `<div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
           <div class="achievement-icon">${esc(ach.icon)}</div>
           <div class="achievement-title">${esc(ach.title)}</div>
           <div class="achievement-desc">${esc(ach.desc)}</div>
           <div class="achievement-xp">${unlocked ? i18n.t('achievement_unlocked') : `${i18n.t('achievement_locked')} ${esc(ach.xp)} XP`}</div></div>`;
-            });
-            grid.innerHTML = html;
+            }).join('');
         }
     }
 };

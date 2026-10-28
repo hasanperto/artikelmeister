@@ -429,6 +429,7 @@
     const ok = chosen === q.article;
     q._correct = ok;
     SRS.record(App.progress, q.id, ok);
+    App.trackAnswer(q.article, ok);
     if (Speech.autoEnabled()) Speech.speak(`${q.article} ${q.word}`);
     ['der', 'die', 'das'].forEach((a) => { document.getElementById(`ai-btn-${a}`).disabled = true; });
     document.getElementById(`ai-btn-${chosen}`).classList.add(ok ? 'correct' : 'wrong');
@@ -504,6 +505,7 @@
     const xp = quiz.correct * 10 + (quiz.correct === total && total >= 10 ? 50 : 0);
     App.progress.gamesPlayed++;
     App.recordPlay();
+    App.trackGame('ai', quiz.correct, total);
     if (xp) App.addXP(xp);
     App.checkArticleAchievements();
     if (quiz.correct === total) App.launchConfetti();
@@ -704,6 +706,7 @@
     const ok = choice === it.answer;
     it._correct = ok;
     if (ok) sent.correct++;
+    App.trackAnswer(null, ok);
     btn.classList.add(ok ? 'correct' : 'wrong');
     document.querySelectorAll('.ai-options .article-btn').forEach((b) => {
       b.disabled = true;
@@ -729,6 +732,7 @@
     const xp = sent.correct * 12;
     App.progress.gamesPlayed++;
     App.recordPlay();
+    App.trackGame('ai', sent.correct, total);
     if (xp) App.addXP(xp);
     if (sent.correct === total) App.launchConfetti();
     root().innerHTML = `${subHeader('ai_sentence_title')}

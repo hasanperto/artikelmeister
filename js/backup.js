@@ -53,6 +53,16 @@
     }
   }
 
+  // Profil tercihleri (seviye, hedef, dil, renk): yalnızca bilinen değerler alınır
+  function pickPrefs(p) {
+    const out = {};
+    if (['beginner', 'intermediate', 'advanced'].includes(p.level)) out.level = p.level;
+    if (Number.isInteger(p.goal) && p.goal > 0 && p.goal <= 500) out.goal = p.goal;
+    if (typeof p.lang === 'string' && i18n.translations[p.lang]) out.lang = p.lang;
+    if (typeof p.theme === 'string' && /^[a-z]{2,12}$/.test(p.theme)) out.theme = p.theme;
+    return out;
+  }
+
   // Yedekteki ilerlemeyi güvenli biçime getir: eksik alanlar varsayılanla tamamlanır, tipler denetlenir
   function normalizeProfile(p) {
     if (!p || typeof p !== 'object' || typeof p.name !== 'string' || !p.progress || typeof p.progress !== 'object') {
@@ -71,6 +81,7 @@
       name: p.name.slice(0, 40),
       avatar: typeof p.avatar === 'string' ? p.avatar.slice(0, 16) : '🧑‍🎓',
       createdAt: p.createdAt || new Date().toISOString(),
+      ...pickPrefs(p),
       progress
     };
   }
