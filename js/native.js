@@ -18,6 +18,7 @@
   function handleBack() {
     if (isVisible('lang-modal')) return App.lang.closeModal();
     if (isVisible('avatar-modal')) return App.profiles.closeModal();
+    if (isVisible('word-sheet')) return App.rules.closeSheet();
     if (isVisible('results')) return document.getElementById('results-continue').click();
 
     const login = document.getElementById('login-screen');
@@ -28,7 +29,6 @@
     }
 
     const section = App.currentSection;
-    if (section === 'learn' && isVisible('learn-examples-area')) return App.learn.backFromExamples();
     if (section === 'cases' && !isVisible('cases-intro')) return App.cases.showIntro();
     if (section === 'quiz') return App.quiz.quit();
     if (section === 'speed') return App.speed.quit();

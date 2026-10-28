@@ -909,9 +909,6 @@ const App = {
         setSubTab(subTab) {
             this.currentSubTab = subTab;
             const section = document.getElementById('section-learn');
-            if (section.querySelector('.back-btn')) section.querySelector('.back-btn').style.display = 'block';
-            document.getElementById('learn-content').style.display = 'block';
-            document.getElementById('learn-examples-area').style.display = 'none';
             this.render();
         },
         render() {
@@ -925,7 +922,6 @@ const App = {
             if (tabs) tabs.style.display = 'flex';
             if (c) c.style.display = 'block';
             if (backBtn) backBtn.style.display = 'block';
-            document.getElementById('learn-examples-area').style.display = 'none';
 
             if (this.currentTab === 'tips') {
                 DB.tips.forEach((tip, i) => {
@@ -961,7 +957,7 @@ const App = {
                     const sortedCats = [...DB.categoryRules[article]].sort((a, b) => (b.priority || 0) - (a.priority || 0));
                     sortedCats.forEach((cat, i) => {
                         html += `
-                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showCategoryExamples(${jsArg(cat.category)}, '${article}')">
+                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.rules.showCategory(${jsArg(cat.category)}, '${article}')">
                             <div class="rule-card-header" style="margin-bottom:0; border-bottom:none; padding:8px 0; justify-content:center; position:relative;">
                                 <span class="rule-suffix" style="font-size:24px; border-radius:12px; border:none; background:none; padding:0;">${esc(cat.icon)}</span>
                                 <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${esc(cat.priority || 0)}</span>
@@ -976,7 +972,7 @@ const App = {
                     const sortedSuffixes = [...DB.suffixRules[article]].sort((a, b) => (b.priority || 0) - (a.priority || 0));
                     sortedSuffixes.forEach((s, i) => {
                         html += `
-                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.learn.showSuffixExamples(${jsArg(s.suffix)}, '${article}')">
+                        <div class="rule-card" style="margin-bottom:0; cursor:pointer; animation-delay:${i * 0.04}s" onclick="App.rules.showSuffix(${jsArg(s.suffix)}, '${article}')">
                             <div class="rule-card-header" style="margin-bottom:0; border-bottom:none; padding:8px 0; justify-content:center; position:relative;">
                                 <span class="rule-suffix ${article}" style="font-size:20px">${esc(s.suffix)}</span>
                                 <span style="position:absolute; top:2px; right:2px; font-size:9px; opacity:0.6;">%${esc(s.priority || 0)}</span>
@@ -989,117 +985,6 @@ const App = {
                 }
             }
             c.innerHTML = html;
-        },
-
-        showSuffixExamples(suffix, article) {
-            const content = document.getElementById('learn-content');
-            const tabs = document.getElementById('learn-tabs');
-            const section = document.getElementById('section-learn');
-            const backBtn = section.querySelector('.back-btn');
-            const examplesArea = document.getElementById('learn-examples-area');
-            const listEl = document.getElementById('suffix-examples-list');
-            const titleEl = document.getElementById('suffix-examples-title');
-            const descEl = document.getElementById('suffix-examples-desc');
-
-            content.style.display = 'none';
-            tabs.style.display = 'none';
-            backBtn.style.display = 'none';
-            examplesArea.style.display = 'block';
-
-            titleEl.textContent = i18n.t('learn_suffix_examples', { suffix });
-            titleEl.className = article;
-
-            const rule = DB.suffixRules[article].find(r => r.suffix === suffix);
-            descEl.textContent = i18n.t('learn_suffix_desc', { article: article.toUpperCase() });
-
-            // Filter words from DB that have this suffix
-            const relatedWords = DB.words.filter(w => w.suffix === suffix || w.word.endsWith(suffix.replace('-', '')));
-
-            listEl.innerHTML = '';
-
-            if (relatedWords.length === 0 && rule && rule.example) {
-                // If no specific words found, show at least the rule's main example
-                relatedWords.push({ word: rule.example.replace(article + ' ', ''), article: article, tr: rule.desc });
-            }
-
-            relatedWords.forEach(w => {
-                const card = document.createElement('div');
-                card.className = 'glass-card';
-                card.style.padding = '15px';
-                card.style.display = 'flex';
-                card.style.flexDirection = 'column';
-                card.style.gap = '8px';
-                card.style.animation = 'wordEnter 0.4s ease-out';
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:18px; font-weight:800; color:var(--${esc(w.article)}-color);">${esc(w.article)} ${esc(w.word)}</span>
-                        <span style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:12px; padding:3px 8px; background:rgba(255,255,255,0.05); border-radius:8px;">${esc(suffix)}</span>
-                            <button type="button" class="speak-btn small" onclick="Speech.speak(${jsArg(w.article + ' ' + w.word)})" aria-label="🔊">🔊</button>
-                        </span>
-                    </div>
-                    <div style="font-size:13px; color:var(--text-muted); opacity:0.8;">${esc(App.getWordTranslation(w, i18n.currentLang))}</div>
-                `;
-                listEl.appendChild(card);
-            });
-
-            window.scrollTo(0, 0);
-        },
-
-        showCategoryExamples(catName, article) {
-            const content = document.getElementById('learn-content');
-            const tabs = document.getElementById('learn-tabs');
-            const section = document.getElementById('section-learn');
-            const backBtn = section.querySelector('.back-btn');
-            const examplesArea = document.getElementById('learn-examples-area');
-            const listEl = document.getElementById('suffix-examples-list');
-            const titleEl = document.getElementById('suffix-examples-title');
-            const descEl = document.getElementById('suffix-examples-desc');
-
-            content.style.display = 'none';
-            tabs.style.display = 'none';
-            backBtn.style.display = 'none';
-            examplesArea.style.display = 'block';
-
-            const cat = DB.categoryRules[article].find(c => c.category === catName);
-            titleEl.textContent = `${cat.icon} ${catName}`;
-            titleEl.className = article;
-            descEl.textContent = i18n.t('learn_category_desc', { article: article.toUpperCase() });
-
-            listEl.innerHTML = '';
-
-            cat.examples.forEach(ex => {
-                const card = document.createElement('div');
-                card.className = 'glass-card';
-                card.style.padding = '15px';
-                card.style.display = 'flex';
-                card.style.flexDirection = 'column';
-                card.style.animation = 'wordEnter 0.4s ease-out';
-
-                // ex format: "der Mann" or "der Euro"
-                const parts = ex.split(' ');
-                const art = parts[0];
-                const wrd = parts.slice(1).join(' ');
-
-                card.innerHTML = `
-                    <span style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:18px; font-weight:800; color:var(--${esc(art)}-color);">${esc(ex)}</span>
-                        <button type="button" class="speak-btn small" onclick="Speech.speak(${jsArg(ex)})" aria-label="🔊">🔊</button>
-                    </span>
-                    <div style="font-size:13px; color:var(--text-muted); opacity:0.7; margin-top:5px;">${esc(i18n.t('learn_category_group', { category: catName }))}</div>
-                `;
-                listEl.appendChild(card);
-            });
-
-            window.scrollTo(0, 0);
-        },
-
-        backFromExamples() {
-            const section = document.getElementById('section-learn');
-            section.querySelector('.back-btn').style.display = 'block';
-            document.getElementById('learn-content').style.display = 'block';
-            document.getElementById('learn-tabs').style.display = 'flex';
-            document.getElementById('learn-examples-area').style.display = 'none';
         },
     },
 
@@ -1397,27 +1282,171 @@ const App = {
                 html += `<div style="margin-bottom:16px;color:var(--text-secondary);font-size:14px;line-height:1.6">${i18n.t('rules_exceptions_desc')}</div>`;
                 DB.exceptions.forEach((exc, i) => {
                     const color = exc.article === 'der' ? 'var(--der-color)' : exc.article === 'die' ? 'var(--die-color)' : 'var(--das-color)';
-                    html += `<div class="rule-card" style="border-left:3px solid ${color};animation-delay:${i * 0.06}s">
+                    const linked = !!this.EXCEPTION_RULE[exc.word];
+                    html += `<div class="rule-card${linked ? ' rule-card-link' : ''}" style="border-left:3px solid ${color};animation-delay:${i * 0.06}s"${linked ? ` role="button" tabindex="0" onclick="App.rules.showException(${jsArg(exc.word)})"` : ''}>
             <div class="rule-card-header"><span style="font-size:26px">${esc(exc.icon)}</span><span class="rule-suffix" style="color:${color}">${esc(exc.article)} ${esc(exc.word)}</span>
             <span class="exception-badge">⚠️ ${i18n.t('exception')}</span></div>
-            <div class="rule-example">${esc(exc.category)}</div></div>`;
+            <div class="rule-example">${esc(exc.category)}</div>${linked ? `<div class="rule-more">${esc(i18n.t('rules_see_rule'))} ›</div>` : ''}</div>`;
                 });
             } else {
                 const a = this.currentTab;
                 html += `<div style="margin-bottom:16px;font-weight:800;font-size:19px">${i18n.t('rules_suffix_title')}</div>`;
                 DB.suffixRules[a].forEach((s, i) => {
-                    html += `<div class="rule-card" style="animation-delay:${i * 0.05}s">
+                    const n = this.suffixWords(s.suffix, a).length;
+                    html += `<div class="rule-card rule-card-link" role="button" tabindex="0" style="animation-delay:${i * 0.05}s" onclick="App.rules.showSuffix(${jsArg(s.suffix)}, '${a}')">
             <div class="rule-card-header"><span class="rule-suffix ${a}">${esc(s.suffix)}</span><span style="color:var(--text-muted)">→ ${a}</span></div>
-            <div class="rule-example"><span>${esc(s.example)}</span> — ${esc(s.desc)}</div></div>`;
+            <div class="rule-example"><span>${esc(s.example)}</span> — ${esc(s.desc)}</div>
+            <div class="rule-more">${esc(i18n.t('rules_words_count', { n }))} ›</div></div>`;
                 });
                 html += `<div style="margin:28px 0 16px;font-weight:800;font-size:19px">${i18n.t('rules_category_title')}</div>`;
                 DB.categoryRules[a].forEach((cat, i) => {
-                    html += `<div class="category-card" style="animation-delay:${i * 0.06}s">
+                    const n = this.categoryWords(cat, a).length;
+                    html += `<div class="category-card rule-card-link" role="button" tabindex="0" style="animation-delay:${i * 0.06}s" onclick="App.rules.showCategory(${jsArg(cat.category)}, '${a}')">
             <div class="category-header"><span class="category-icon">${esc(cat.icon)}</span><span class="category-title">${esc(cat.category)}</span></div>
-            <div class="category-examples">${cat.examples.map(e => `<span class="category-tag ${a}">${esc(e)}</span>`).join('')}</div></div>`;
+            <div class="category-examples">${cat.examples.map(e => `<span class="category-tag ${a}">${esc(e)}</span>`).join('')}</div>
+            <div class="rule-more">${esc(i18n.t('rules_words_count', { n }))} ›</div></div>`;
                 });
             }
             c.innerHTML = html;
+        },
+
+        // Kategori kuralı (ikonla eşlenir; ad dile göre değişir) → sözlükteki ilgili kelime grupları.
+        // contrast: aynı gruptaki başka artikelli kelimeler istisna olarak gösterilir.
+        CATEGORY_WORDS: {
+            der: {
+                '👨': { cats: ['people', 'family', 'profession'], words: ['Hahn', 'Stier', 'Kater', 'Löwe'] },
+                '📅': { cats: ['days'], contrast: true },
+                '🗓️': { cats: ['months'], contrast: true },
+                '🌦️': { cats: ['seasons'], contrast: true },
+                '🌧️': { cats: ['weather'], contrast: true },
+                '🧭': { cats: ['directions'], contrast: true },
+                '🍷': { cats: ['drinks'], test: w => !['Wasser', 'Milch', 'Limonade'].includes(w.word), contrast: true },
+                '🚗': { cats: ['brands'], contrast: true },
+                '💰': { cats: ['money'], test: w => w.word !== 'Geld' && w.word !== 'Konto', contrast: true }
+            },
+            die: {
+                '👩': { cats: ['people', 'family', 'profession'], words: ['Kuh', 'Henne', 'Löwin', 'Katze'] },
+                '🌸': { cats: ['plants'], words: ['Rose', 'Banane', 'Blume', 'Apfel', 'Baum'], contrast: true },
+                '✈️': { cats: ['vessels'], words: ['Schiff', 'Flugzeug'], contrast: true },
+                '🔢': { cats: ['numbers'], test: w => !/tel$/.test(w.word), contrast: true },
+                '🏞️': { cats: ['rivers'], contrast: true }
+            },
+            das: {
+                '👶': { test: w => /chen$|lein$/.test(w.word) && ['people', 'family', 'animals'].includes(w.category),
+                    words: ['Kind', 'Baby', 'Lamm', 'Kalb', 'Ferkel', 'Fohlen', 'Küken'] },
+                '🏊': { cats: ['hobbies', 'food'], test: w => /en$/.test(w.word) && !/chen$/.test(w.word) },
+                '🎨': { cats: ['colors'], words: ['Farbe'], contrast: true },
+                '🥇': { cats: ['materials'], test: w => !['Diamant', 'Smaragd', 'Benzin', 'Zement'].includes(w.word), contrast: true },
+                '🌍': { cats: ['languages'], words: ['Sprache'], contrast: true },
+                '⚗️': { test: w => /stoff$/.test(w.word), words: ['Helium', 'Uran', 'Natrium', 'Kalium', 'Chlor', 'Neon'], contrast: true },
+                '⚖️': { cats: ['units'], contrast: true }
+            }
+        },
+
+        // İstisna → çiğnediği kural (ek veya kategori ikonu)
+        EXCEPTION_RULE: {
+            Bier: ['der', '🍷'], Apfel: ['die', '🌸'], Käse: ['die', '-e'], Name: ['die', '-e'],
+            Mädchen: ['das', '-chen'], Reichtum: ['das', '-tum'], Irrtum: ['das', '-tum'],
+            Rhein: ['die', '🏞️'], Main: ['die', '🏞️'], Stahl: ['das', '🥇'], Bronze: ['das', '🥇']
+        },
+
+        // "der Mann" → sözlükteki kelime (çeviri için) ya da yalın kayıt
+        parseExample(ex, fallbackArticle, note) {
+            const m = /^(der|die|das)\s+(.+)$/.exec(ex || '');
+            const article = m ? m[1] : fallbackArticle;
+            const word = m ? m[2] : ex;
+            return DB.words.find(w => w.word === word && w.article === article)
+                || { word, article, translations: note ? { tr: note, en: note, de: note, uk: note, ar: note } : {} };
+        },
+
+        // Bu kurala bağlı istisnalar (DB.exceptions), açıklamalarıyla
+        ruleExceptions(article, key) {
+            return DB.exceptions
+                .filter(e => { const r = this.EXCEPTION_RULE[e.word]; return r && r[0] === article && r[1] === key; })
+                .map(e => this.parseExample(`${e.article} ${e.word}`, e.article, e.category));
+        },
+
+        // Sözlükte bu ekle biten tüm kelimeler (alfabetik). Kuralın kendi örneği ve bağlı istisnalar
+        // sözlükte yoksa onlar da eklenir; çevirisi yerine kural açıklaması gösterilir.
+        suffixWords(suffix, article) {
+            const end = suffix.replace(/^-/, '').toLowerCase();
+            const words = DB.words.filter(w => w.suffix === suffix || w.word.toLowerCase().endsWith(end));
+            const rule = DB.suffixRules[article]?.find(r => r.suffix === suffix);
+            if (rule) words.push(this.parseExample(rule.example, article, rule.desc));
+            words.push(...this.ruleExceptions(article, suffix));
+            return this.uniqueSorted(words);
+        },
+
+        categoryWords(cat, article) {
+            const map = this.CATEGORY_WORDS[article]?.[cat.icon];
+            const words = cat.examples.map(ex => this.parseExample(ex, article));
+            if (map) {
+                words.push(...DB.words.filter(w => {
+                    const inGroup = map.words?.includes(w.word)
+                        || ((!map.cats || map.cats.includes(w.category)) && (!map.test || map.test(w)) && (map.cats || map.test));
+                    return inGroup && (map.contrast || w.article === article);
+                }));
+            }
+            words.push(...this.ruleExceptions(article, cat.icon));
+            return this.uniqueSorted(words);
+        },
+
+        uniqueSorted(words) {
+            const seen = new Set();
+            return words
+                .filter(w => { const k = `${w.article} ${w.word}`; if (seen.has(k)) return false; seen.add(k); return true; })
+                .sort((x, y) => x.word.localeCompare(y.word, 'de'));
+        },
+
+        showSuffix(suffix, article) {
+            this.openSheet(`<span class="rule-suffix ${article}">${esc(suffix)}</span> ${esc(i18n.t('rules_words_title'))}`,
+                this.suffixWords(suffix, article), article);
+        },
+
+        showCategory(catName, article) {
+            const cat = DB.categoryRules[article]?.find(c => c.category === catName);
+            if (!cat) return;
+            this.openSheet(`${esc(cat.icon)} <span class="word-sheet-word ${article}">${esc(cat.category)}</span> → ${article}`,
+                this.categoryWords(cat, article), article);
+        },
+
+        // İstisna kartı: çiğnediği kuralın tam listesini aç
+        showException(word) {
+            const r = this.EXCEPTION_RULE[word];
+            if (!r) return;
+            const [article, key] = r;
+            if (key.startsWith('-')) return this.showSuffix(key, article);
+            const cat = DB.categoryRules[article]?.find(c => c.icon === key);
+            if (cat) this.showCategory(cat.category, article);
+        },
+
+        openSheet(titleHtml, words, article) {
+            const follow = words.filter(w => w.article === article);
+            const other = words.filter(w => w.article !== article);
+            const row = (w) => {
+                const tr = App.getWordTranslation(w, i18n.currentLang);
+                return `<div class="word-sheet-row">
+          <span class="word-sheet-word ${esc(w.article)}">${esc(w.article)} ${esc(w.word)}</span>
+          <span class="word-sheet-tr">${tr && tr !== w.word ? esc(tr) : ''}</span>
+          <button type="button" class="speak-btn small" onclick="Speech.speak(${jsArg(w.article + ' ' + w.word)})" aria-label="🔊">🔊</button></div>`;
+            };
+            let html = '';
+            if (follow.length) {
+                html += `<div class="word-sheet-group">${esc(i18n.t('rules_words_follow', { article, n: follow.length }))}</div>${follow.map(row).join('')}`;
+            }
+            if (other.length) {
+                html += `<div class="word-sheet-group warn">⚠️ ${esc(i18n.t('rules_words_other', { n: other.length }))}</div>${other.map(row).join('')}`;
+            }
+            if (!words.length) html = `<div class="word-sheet-empty">${esc(i18n.t('rules_words_empty'))}</div>`;
+            document.getElementById('word-sheet-title').innerHTML = titleHtml;
+            document.getElementById('word-sheet-list').innerHTML = html;
+            const sheet = document.getElementById('word-sheet');
+            sheet.classList.remove('hidden');
+            sheet.querySelector('.word-sheet-body').scrollTop = 0;
+        },
+
+        closeSheet() {
+            document.getElementById('word-sheet').classList.add('hidden');
         }
     },
 

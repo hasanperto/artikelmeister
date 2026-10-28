@@ -35,6 +35,17 @@
     <div class="login-profiles" id="login-profiles"></div>
   </div>
 
+  <!-- Kural kelime listesi -->
+  <div class="word-sheet hidden" id="word-sheet" onclick="if (event.target === this) App.rules.closeSheet()">
+    <div class="word-sheet-body" role="dialog" aria-labelledby="word-sheet-title">
+      <div class="word-sheet-head">
+        <div class="word-sheet-title" id="word-sheet-title"></div>
+        <button type="button" class="word-sheet-close" onclick="App.rules.closeSheet()" aria-label="✕">✕</button>
+      </div>
+      <div id="word-sheet-list"></div>
+    </div>
+  </div>
+
   <!-- Avatar Picker Modal -->
   <div class="avatar-modal hidden" id="avatar-modal">
     <div class="profile-form">
@@ -260,20 +271,6 @@
       </div>
       <div id="learn-content"></div>
 
-      <!-- Suffix Examples Area (Hidden initially) -->
-      <div id="learn-examples-area" style="display:none; text-align:left; margin-top:16px;">
-        <button class="btn btn-secondary" onclick="App.learn.backFromExamples()"
-          style="margin-bottom:16px; background:rgba(255,255,255,0.1);" data-i18n="back">← Geri</button>
-
-        <h2 id="suffix-examples-title" style="font-weight:800; margin-bottom:12px; color:var(--accent);">Ek Örnekleri
-        </h2>
-        <p id="suffix-examples-desc" style="font-size:14px; color:var(--text-muted); margin-bottom:20px;"></p>
-
-        <div id="suffix-examples-list"
-          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap:12px; margin-top:10px;">
-          <!-- Populated by JS -->
-        </div>
-      </div>
     </section>
 
     <!-- QUIZ -->

@@ -163,6 +163,43 @@ function migrateSchema() {
 
 migrateSchema();
 
+// data/database.js'e sonradan eklenen kelimeleri (id 1001+) dolu veritabanına bir kez aktar.
+// Aynı kelime+artikel zaten varsa atlanır; yönetici sonradan silerse geri gelmez.
+function importLegacyWords(batch, minId) {
+  const key = `migration_legacy_words_${batch}`;
+  if (getMeta(key) || getMeta('seeded') !== '1') return;
+  const legacyDB = require('../data/database.js');
+  const { syncWordTranslations } = require('./words-helper');
+  const exists = db.prepare('SELECT 1 FROM words WHERE word = ? AND article = ?');
+  const idTaken = db.prepare('SELECT 1 FROM words WHERE id = ?');
+  const insert = db.prepare(`
+    INSERT INTO words (id, word, article, tr, en, translations_json, category, difficulty, suffix, is_exception)
+    VALUES (@id, @word, @article, @tr, @en, @translations_json, @category, @difficulty, @suffix, 0)
+  `);
+  let added = 0;
+  db.transaction(() => {
+    legacyDB.words.filter((w) => w.id >= minId).forEach((w) => {
+      if (exists.get(w.word, w.article)) return;
+      const body = syncWordTranslations({ word: w.word, tr: w.tr, en: w.en, uk: w.uk, ar: w.ar });
+      insert.run({
+        id: idTaken.get(w.id) ? nextWordId() : w.id,
+        word: w.word,
+        article: w.article,
+        tr: body.tr,
+        en: body.en,
+        translations_json: body.translations_json,
+        category: w.category || 'general',
+        difficulty: w.difficulty || 1,
+        suffix: w.suffix || null
+      });
+      added++;
+    });
+    setMeta(key, '1');
+    if (added) bumpContentVersion();
+  })();
+  if (added) console.log(`${added} yeni kelime veritabanına eklendi.`);
+}
+
 // Silinen kelimelerin ID'leri tekrar kullanılmaz (istemci ilerlemesi ID ile tutulur)
 function syncWordIdSeq() {
   const maxId = db.prepare('SELECT COALESCE(MAX(id), 0) AS m FROM words').get().m;
@@ -199,6 +236,17 @@ function bumpContentVersion() {
   return v;
 }
 
+syncWordIdSeq();
+importLegacyWords('2', 1001);
+
+// Yazım düzeltmesi: das Vakterium → das Bakterium
+if (!getMeta('migration_fix_bakterium')) {
+  const r = db.prepare(`UPDATE words SET word = 'Bakterium',
+    translations_json = json_set(COALESCE(translations_json, '{}'), '$.de', 'Bakterium')
+    WHERE word = 'Vakterium' AND article = 'das'`).run();
+  setMeta('migration_fix_bakterium', '1');
+  if (r.changes) bumpContentVersion();
+}
 syncWordIdSeq();
 
 module.exports = { db, getMeta, setMeta, bumpContentVersion, nextWordId, syncWordIdSeq };

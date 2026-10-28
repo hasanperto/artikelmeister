@@ -7,7 +7,8 @@ const CATEGORIES = [
   'technology', 'food', 'nature', 'transport', 'days', 'months', 'seasons',
   'weather', 'directions', 'money', 'drinks', 'places', 'rooms', 'abstract',
   'hobbies', 'clothing', 'objects', 'body', 'materials', 'time', 'events',
-  'health', 'science', 'general'
+  'health', 'science', 'plants', 'vessels', 'numbers', 'rivers', 'colors',
+  'languages', 'units', 'brands', 'general'
 ];
 
 function getSuffixHints() {

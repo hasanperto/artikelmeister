@@ -109,7 +109,7 @@ function seedIfEmpty() {
         article: w.article,
         tr: w.tr,
         en: w.en,
-        translations_json: syncWordTranslations({ word: w.word, tr: w.tr, en: w.en }).translations_json,
+        translations_json: syncWordTranslations({ word: w.word, tr: w.tr, en: w.en, uk: w.uk, ar: w.ar }).translations_json,
         category: w.category || 'general',
         difficulty: w.difficulty || 1,
         suffix: w.suffix || null,

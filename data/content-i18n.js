@@ -238,7 +238,15 @@ const ContentI18n = {
     events: ['Etkinlikler', 'Ereignisse', 'Events', 'Події', 'المناسبات'],
     body: ['Vücut', 'Körper', 'Body', 'Тіло', 'الجسم'],
     health: ['Sağlık', 'Gesundheit', 'Health', 'Здоров’я', 'الصحة'],
-    science: ['Bilim', 'Wissenschaft', 'Science', 'Наука', 'العلوم']
+    science: ['Bilim', 'Wissenschaft', 'Science', 'Наука', 'العلوم'],
+    plants: ['Bitkiler & meyveler', 'Pflanzen & Obst', 'Plants & fruit', 'Рослини й фрукти', 'النباتات والفواكه'],
+    vessels: ['Uçak & gemiler', 'Flugzeuge & Schiffe', 'Aircraft & ships', 'Літаки й кораблі', 'الطائرات والسفن'],
+    numbers: ['Sayılar', 'Zahlen', 'Numbers', 'Числа', 'الأرقام'],
+    rivers: ['Nehirler', 'Flüsse', 'Rivers', 'Річки', 'الأنهار'],
+    colors: ['Renkler', 'Farben', 'Colours', 'Кольори', 'الألوان'],
+    languages: ['Diller', 'Sprachen', 'Languages', 'Мови', 'اللغات'],
+    units: ['Birimler', 'Maßeinheiten', 'Units', 'Одиниці виміру', 'الوحدات'],
+    brands: ['Markalar', 'Marken', 'Brands', 'Бренди', 'العلامات التجارية']
   },
 
   // Alıştırma kelimelerinin anlamı → [en, uk, ar] (DE'de anlam gösterilmez)

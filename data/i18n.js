@@ -308,6 +308,12 @@ const i18n = {
       cases_table_akk: 'Akkusativ (-i)',
       cases_table_dat: 'Dativ (-e)',
       cases_table_gen: 'Genitiv (İyelik)',
+      rules_words_count: '{n} kelime',
+      rules_words_title: 'ile biten kelimeler',
+      rules_words_follow: 'Kurala uyanlar — {article} ({n})',
+      rules_words_other: 'İstisnalar — başka artikel ({n})',
+      rules_words_empty: 'Sözlükte bu ekle biten kelime yok.',
+      rules_see_rule: 'Kuralı ve tüm kelimeleri gör',
 
       // Profil, istatistik & kademeli rozetler
       profile_edit: '✏️ Düzenle',
@@ -669,6 +675,12 @@ const i18n = {
       cases_table_akk: 'Akkusativ (direct object)',
       cases_table_dat: 'Dativ (indirect object)',
       cases_table_gen: 'Genitiv (possession)',
+      rules_words_count: '{n} words',
+      rules_words_title: 'words with this ending',
+      rules_words_follow: 'Follow the rule — {article} ({n})',
+      rules_words_other: 'Exceptions — other article ({n})',
+      rules_words_empty: 'No words with this ending in the dictionary.',
+      rules_see_rule: 'See the rule and all words',
 
       // Profil, istatistik & kademeli rozetler
       profile_edit: '✏️ Edit',
@@ -1049,6 +1061,12 @@ const i18n = {
       cases_table_akk: 'Akkusativ (Wen?)',
       cases_table_dat: 'Dativ (Wem?)',
       cases_table_gen: 'Genitiv (Wessen?)',
+      rules_words_count: '{n} Wörter',
+      rules_words_title: 'Wörter mit dieser Endung',
+      rules_words_follow: 'Folgen der Regel — {article} ({n})',
+      rules_words_other: 'Ausnahmen — anderer Artikel ({n})',
+      rules_words_empty: 'Keine Wörter mit dieser Endung im Wörterbuch.',
+      rules_see_rule: 'Regel und alle Wörter ansehen',
 
       // Profil, istatistik & kademeli rozetler
       profile_edit: '✏️ Bearbeiten',
@@ -1429,6 +1447,12 @@ const i18n = {
       cases_table_akk: 'Akkusativ (знахідний)',
       cases_table_dat: 'Dativ (давальний)',
       cases_table_gen: 'Genitiv (родовий)',
+      rules_words_count: 'слів: {n}',
+      rules_words_title: 'слова з цим закінченням',
+      rules_words_follow: 'За правилом — {article} ({n})',
+      rules_words_other: 'Винятки — інший артикль ({n})',
+      rules_words_empty: 'У словнику немає слів із цим закінченням.',
+      rules_see_rule: 'Правило та всі слова',
 
       // Profil, istatistik & kademeli rozetler
       profile_edit: '✏️ Редагувати',
@@ -1809,6 +1833,12 @@ const i18n = {
       cases_table_akk: 'Akkusativ (المفعول به)',
       cases_table_dat: 'Dativ (المفعول غير المباشر)',
       cases_table_gen: 'Genitiv (الملكية)',
+      rules_words_count: '{n} كلمة',
+      rules_words_title: 'كلمات بهذه النهاية',
+      rules_words_follow: 'تتبع القاعدة — {article} ({n})',
+      rules_words_other: 'استثناءات — أداة أخرى ({n})',
+      rules_words_empty: 'لا توجد كلمات بهذه النهاية في القاموس.',
+      rules_see_rule: 'عرض القاعدة وكل الكلمات',
 
       // Profil, istatistik & kademeli rozetler
       profile_edit: '✏️ تعديل',

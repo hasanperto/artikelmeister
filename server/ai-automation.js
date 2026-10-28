@@ -33,7 +33,7 @@ const CATEGORY_ALIASES = {
   doğa: 'nature', nature: 'nature', doga: 'nature',
   ulaşım: 'transport', transport: 'transport', ulasim: 'transport',
   para: 'money', money: 'money',
-  renkler: 'general', metals: 'materials', metaller: 'materials',
+  renkler: 'colors', colors: 'colors', metals: 'materials', metaller: 'materials',
   zaman: 'time', time: 'time',
   vücut: 'body', body: 'body', vucut: 'body',
   giyim: 'clothing', clothing: 'clothing',
@@ -52,7 +52,8 @@ const CATEGORY_LABELS = {
   time: 'Zaman', body: 'Vücut', clothing: 'Giyim', hobbies: 'Hobiler',
   abstract: 'Soyut kavramlar', school: 'Okul', people: 'İnsanlar', general: 'Genel',
   rooms: 'Odalar', objects: 'Nesneler', materials: 'Materyaller', events: 'Etkinlikler',
-  health: 'Sağlık', science: 'Bilim'
+  health: 'Sağlık', science: 'Bilim', plants: 'Bitkiler & meyveler', vessels: 'Uçak & gemiler',
+  numbers: 'Sayılar', rivers: 'Nehirler', colors: 'Renkler', languages: 'Diller', units: 'Birimler', brands: 'Markalar'
 };
 
 function normalizeQuery(q) {
